@@ -1,0 +1,293 @@
+{
+  "gyms": [
+    {
+      "id": "1",
+      "name": "Climb Up Lyon Confluence",
+      "address": "112 Cours Charlemagne, 69002 Lyon",
+      "phone": "04 78 42 78 00",
+      "website": "https://www.climb-up.fr/salles/lyon-confluence/",
+      "description": "Grande salle d'escalade moderne avec plus de 2000m² de surface grimpable. Bloc et voies jusqu'à 15m de hauteur.",
+      "openingHours": {
+        "monday": "12:00-23:00",
+        "tuesday": "10:00-23:00",
+        "wednesday": "10:00-23:00",
+        "thursday": "10:00-23:00",
+        "friday": "10:00-23:00",
+        "saturday": "09:00-20:00",
+        "sunday": "09:00-20:00"
+      },
+      "pricing": {
+        "singleEntry": "16€",
+        "tenSessions": "130€",
+        "monthlyUnlimited": "65€",
+        "yearlySubscription": "550€",
+        "equipmentRental": "5€"
+      },
+      "features": [
+        "Bloc",
+        "Voies",
+        "Salle de musculation",
+        "Sauna"
+      ],
+      "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
+      "crowdLevel": 3,
+      "lastSectorChange": {
+        "sectorName": "dalle",
+        "description": "Un secteur a été modifié",
+        "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
+        "timestamp": "2026-02-17T19:11:32.835Z"
+      },
+      "sectorChangedRecently": true
+    },
+    {
+      "id": "2",
+      "name": "Altissimo Villeurbanne",
+      "address": "165 Rue Léon Blum, 69100 Villeurbanne",
+      "phone": "04 72 68 84 90",
+      "website": "https://www.altissimo.fr/salle/villeurbanne/",
+      "description": "Salle d'escalade avec une grande variété de voies et de blocs pour tous niveaux. Espace détente et restauration.",
+      "openingHours": {
+        "monday": "12:00-22:30",
+        "tuesday": "09:00-22:30",
+        "wednesday": "09:00-22:30",
+        "thursday": "09:00-22:30",
+        "friday": "09:00-22:30",
+        "saturday": "09:00-19:00",
+        "sunday": "09:00-19:00"
+      },
+      "pricing": {
+        "singleEntry": "15€",
+        "tenSessions": "120€",
+        "monthlyUnlimited": "60€",
+        "yearlySubscription": "500€",
+        "equipmentRental": "4€"
+      },
+      "features": [
+        "Bloc",
+        "Voies",
+        "Cours collectifs",
+        "Bar"
+      ],
+      "image": "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=400",
+      "crowdLevel": 2,
+      "lastSectorChange": null,
+      "sectorChangedRecently": false
+    },
+    {
+      "id": "3",
+      "name": "Mroc Laennec",
+      "address": "36 Rue Laennec, 69008 Lyon",
+      "phone": "04 78 00 48 60",
+      "website": "https://mroc.fr/",
+      "description": "Salle de bloc pure avec plus de 200 blocs de tous niveaux. Ambiance conviviale et communauté active.",
+      "openingHours": {
+        "monday": "12:00-22:30",
+        "tuesday": "12:00-22:30",
+        "wednesday": "10:00-22:30",
+        "thursday": "12:00-22:30",
+        "friday": "12:00-22:30",
+        "saturday": "10:00-19:30",
+        "sunday": "10:00-19:30"
+      },
+      "pricing": {
+        "singleEntry": "14€",
+        "tenSessions": "110€",
+        "monthlyUnlimited": "55€",
+        "yearlySubscription": "480€",
+        "equipmentRental": "3€"
+      },
+      "features": [
+        "Bloc uniquement",
+        "Yoga",
+        "Cours d'initiation"
+      ],
+      "image": "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400",
+      "crowdLevel": 4,
+      "lastSectorChange": null,
+      "sectorChangedRecently": false
+    },
+    {
+      "id": "4",
+      "name": "Mroc Monplaisir",
+      "address": "60 Rue Professeur Florence, 69003 Lyon",
+      "phone": "04 37 56 32 70",
+      "website": "https://mroc.fr/",
+      "description": "La plus grande salle de bloc de Lyon avec un espace de 1200m². Renouvellement régulier des blocs.",
+      "openingHours": {
+        "monday": "12:00-22:30",
+        "tuesday": "12:00-22:30",
+        "wednesday": "10:00-22:30",
+        "thursday": "12:00-22:30",
+        "friday": "12:00-22:30",
+        "saturday": "10:00-19:30",
+        "sunday": "10:00-19:30"
+      },
+      "pricing": {
+        "singleEntry": "14€",
+        "tenSessions": "110€",
+        "monthlyUnlimited": "55€",
+        "yearlySubscription": "480€",
+        "equipmentRental": "3€"
+      },
+      "features": [
+        "Bloc uniquement",
+        "Espace enfants",
+        "Café"
+      ],
+      "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400",
+      "crowdLevel": 3,
+      "lastSectorChange": null,
+      "sectorChangedRecently": false
+    },
+    {
+      "id": "5",
+      "name": "Azium Escalade",
+      "address": "71 Rue Francis de Pressensé, 69100 Villeurbanne",
+      "phone": "04 72 69 85 50",
+      "website": "https://www.azium.fr/",
+      "description": "Centre d'escalade associatif avec une ambiance familiale. Cours pour tous les âges et tous les niveaux.",
+      "openingHours": {
+        "monday": "17:00-22:00",
+        "tuesday": "17:00-22:00",
+        "wednesday": "14:00-22:00",
+        "thursday": "17:00-22:00",
+        "friday": "17:00-22:00",
+        "saturday": "14:00-19:00",
+        "sunday": "Fermé"
+      },
+      "pricing": {
+        "singleEntry": "12€",
+        "tenSessions": "95€",
+        "monthlyUnlimited": "45€",
+        "yearlySubscription": "380€",
+        "equipmentRental": "3€"
+      },
+      "features": [
+        "Voies",
+        "Bloc",
+        "Cours enfants",
+        "Association"
+      ],
+      "image": "https://images.unsplash.com/photo-1606449935067-fc66c8921430?w=400",
+      "crowdLevel": 2,
+      "lastSectorChange": null,
+      "sectorChangedRecently": false
+    },
+    {
+      "id": "6",
+      "name": "Mur de Lyon",
+      "address": "13 Rue Gorge de Loup, 69009 Lyon",
+      "phone": "04 78 47 47 70",
+      "website": "https://www.lemurdelyon.fr/",
+      "description": "Salle d'escalade historique de Lyon. Ambiance authentique et communauté de grimpeurs passionnés.",
+      "openingHours": {
+        "monday": "12:00-22:00",
+        "tuesday": "12:00-22:00",
+        "wednesday": "10:00-22:00",
+        "thursday": "12:00-22:00",
+        "friday": "12:00-22:00",
+        "saturday": "10:00-19:00",
+        "sunday": "10:00-19:00"
+      },
+      "pricing": {
+        "singleEntry": "13€",
+        "tenSessions": "100€",
+        "monthlyUnlimited": "50€",
+        "yearlySubscription": "420€",
+        "equipmentRental": "4€"
+      },
+      "features": [
+        "Voies",
+        "Bloc",
+        "Stage été",
+        "Compétitions"
+      ],
+      "image": "https://images.unsplash.com/photo-1578763363228-6e8428de69b2?w=400",
+      "crowdLevel": 3,
+      "lastSectorChange": null,
+      "sectorChangedRecently": false
+    }
+  ],
+  "users": [
+    {
+      "id": "c35f45ba-334a-4446-a43c-b63e1087d131",
+      "email": "demo@test.com",
+      "name": "demo",
+      "createdAt": "2026-02-17T19:05:42.326Z"
+    },
+    {
+      "id": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "email": "aurelien.briens74@gmail.com",
+      "name": "aurelien.briens74",
+      "createdAt": "2026-02-17T19:09:14.291Z"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "dec6e8dc-06b4-4321-b264-ce5da0bf4545",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "pushToken": null,
+      "createdAt": "2026-02-17T19:11:43.787Z"
+    }
+  ],
+  "notifications": [],
+  "crowdUpdates": [
+    {
+      "id": "d732df74-0765-442e-a42a-60648d266126",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 4,
+      "timestamp": "2026-02-17T19:09:25.763Z"
+    },
+    {
+      "id": "d5f9f16f-cab0-4cd9-ac6d-ba71c55b2911",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 2,
+      "timestamp": "2026-02-17T19:11:13.407Z"
+    },
+    {
+      "id": "b8f69c32-80b9-40ff-9a12-59cfcb288a5a",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-02-17T19:11:19.225Z"
+    },
+    {
+      "id": "7c0083fd-96e3-4897-ace4-f43bbcef01b8",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-02-17T19:11:21.472Z"
+    },
+    {
+      "id": "e4c5fd9a-edc7-43fa-bfac-1513ebd8fd8b",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 4,
+      "timestamp": "2026-02-17T19:11:22.952Z"
+    },
+    {
+      "id": "65a3f03e-8b0b-495a-8f9b-f31654999a7b",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 5,
+      "timestamp": "2026-02-17T19:11:24.184Z"
+    },
+    {
+      "id": "a9f8f80f-209e-4b27-a141-33292ee3f29c",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 4,
+      "timestamp": "2026-02-17T19:11:25.825Z"
+    },
+    {
+      "id": "c6b82dff-8e39-4fdc-96cd-e5c83bc86f1c",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 2,
+      "timestamp": "2026-02-17T19:11:26.272Z"
+    }
+  ]
+}

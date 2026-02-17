@@ -1,0 +1,19 @@
+{
+  "name": "climbing-lyon-backend",
+  "version": "1.0.0",
+  "description": "API pour l'application Salles d'Escalade Lyon",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["escalade", "lyon", "climbing", "api"],
+  "author": "Climbing Lyon",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "uuid": "^13.0.0"
+  }
+}

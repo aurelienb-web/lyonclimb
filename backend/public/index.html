@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🧗 Salles d'Escalade Lyon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; min-height: 100vh; }
+    .app-container { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+    .header { background: #fff; padding: 20px; border-bottom: 1px solid #ecf0f1; position: sticky; top: 0; z-index: 100; }
+    .header h1 { font-size: 28px; font-weight: 800; color: #2c3e50; }
+    .header p { color: #7f8c8d; font-size: 14px; margin-top: 4px; }
+    .tab-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #ecf0f1; padding: 8px 0; z-index: 100; max-width: 480px; margin: 0 auto; }
+    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px; cursor: pointer; transition: all 0.2s; border: none; background: none; }
+    .tab-item.active { color: #e74c3c; }
+    .tab-item span.icon { font-size: 24px; margin-bottom: 4px; }
+    .tab-item span.label { font-size: 11px; font-weight: 600; color: #95a5a6; }
+    .tab-item.active span.label { color: #e74c3c; }
+    .main-content { padding-bottom: 80px; }
+    .gym-list { padding: 12px; }
+    .gym-card { background: #fff; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+    .gym-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+    .gym-card img { width: 100%; height: 160px; object-fit: cover; background: #f0f0f0; }
+    .gym-card .new-badge { position: absolute; top: 12px; right: 12px; background: #e74c3c; color: #fff; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .gym-card .content { padding: 16px; }
+    .gym-card .name { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
+    .gym-card .address { font-size: 14px; color: #7f8c8d; margin-bottom: 12px; }
+    .gym-card .footer { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .gym-card .price-container { text-align: left; }
+    .gym-card .price-label { font-size: 11px; color: #95a5a6; text-transform: uppercase; }
+    .gym-card .price { font-size: 20px; font-weight: 700; color: #e74c3c; }
+    .crowd-badge { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .crowd-badge span { margin-right: 4px; }
+    .features { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feature-tag { background: #ecf0f1; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #7f8c8d; }
+    .detail-image { width: 100%; height: 250px; object-fit: cover; background: #f0f0f0; }
+    .alert-banner { background: #e74c3c; color: #fff; padding: 12px; text-align: center; }
+    .alert-banner .title { font-weight: 700; font-size: 14px; }
+    .alert-banner .detail { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+    .detail-content { padding: 20px; }
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .detail-title { flex: 1; margin-right: 12px; }
+    .detail-title h2 { font-size: 24px; font-weight: 800; color: #2c3e50; margin-bottom: 8px; }
+    .detail-title .address { font-size: 14px; color: #3498db; cursor: pointer; }
+    .subscribe-btn { background: #e74c3c; color: #fff; border: none; padding: 10px 16px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+    .subscribe-btn.subscribed { background: #27ae60; }
+    .crowd-banner { padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
+    .crowd-banner .crowd-title { font-size: 12px; color: #7f8c8d; text-transform: uppercase; margin-bottom: 8px; }
+    .crowd-banner .crowd-display { display: flex; align-items: center; justify-content: center; }
+    .crowd-banner .crowd-emoji { font-size: 20px; margin-right: 8px; }
+    .crowd-banner .crowd-label { font-size: 18px; font-weight: 700; }
+    .description { font-size: 15px; line-height: 22px; color: #555; margin-bottom: 24px; }
+    .section { margin-bottom: 24px; }
+    .section-title { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 12px; }
+    .link { font-size: 15px; color: #3498db; margin-bottom: 8px; cursor: pointer; display: block; text-decoration: none; }
+    .pricing-grid { background: #f8f9fa; border-radius: 12px; padding: 16px; }
+    .price-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ecf0f1; }
+    .price-item:last-child { border-bottom: none; }
+    .price-item .label { font-size: 14px; color: #7f8c8d; }
+    .price-item .value { font-size: 14px; font-weight: 700; color: #e74c3c; }
+    .schedule-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ecf0f1; }
+    .schedule-row .day { font-size: 14px; color: #2c3e50; }
+    .schedule-row .hours { font-size: 14px; color: #7f8c8d; }
+    .features-container { display: flex; flex-wrap: wrap; gap: 8px; }
+    .features-container .feature-tag { padding: 8px 14px; font-size: 14px; }
+    .contribution-section { background: #f8f9fa; border-radius: 16px; padding: 20px; margin-top: 8px; margin-bottom: 40px; }
+    .contribution-title { font-size: 18px; font-weight: 700; color: #2c3e50; text-align: center; margin-bottom: 8px; }
+    .crowd-selector { margin: 16px 0; }
+    .crowd-selector .title { font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 12px; text-align: center; }
+    .levels-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .level-btn { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; border-radius: 12px; border: 2px solid #ecf0f1; background: #fff; cursor: pointer; min-width: 100px; width: 30%; transition: all 0.2s; }
+    .level-btn.selected { color: #fff; }
+    .level-btn .emoji { font-size: 28px; margin-bottom: 4px; }
+    .level-btn .text { font-size: 11px; text-align: center; color: inherit; }
+    .report-btn { background: #3498db; color: #fff; border: none; padding: 16px; border-radius: 12px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; transition: background 0.2s; }
+    .report-btn:hover { background: #2980b9; }
+    .report-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+    .login-hint { text-align: center; color: #95a5a6; margin-top: 12px; font-size: 13px; }
+    .back-btn { display: flex; align-items: center; padding: 12px 20px; background: #fff; border-bottom: 1px solid #ecf0f1; cursor: pointer; position: sticky; top: 0; z-index: 100; }
+    .back-btn span { color: #3498db; font-weight: 600; }
+    .login-container { padding: 40px 20px; text-align: center; }
+    .login-icon { font-size: 80px; margin-bottom: 16px; }
+    .login-title { font-size: 32px; font-weight: 800; color: #2c3e50; margin-bottom: 8px; }
+    .login-subtitle { font-size: 16px; color: #7f8c8d; line-height: 24px; margin-bottom: 40px; }
+    .form-group { text-align: left; margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; color: #2c3e50; margin-bottom: 8px; }
+    .form-group input { width: 100%; padding: 16px; border: 1px solid #ecf0f1; border-radius: 12px; font-size: 16px; background: #fff; }
+    .login-btn { width: 100%; background: #e74c3c; color: #fff; border: none; padding: 18px; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .login-btn:hover { background: #c0392b; }
+    .login-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+    .feature-list { margin-top: 40px; }
+    .feature-item { display: flex; align-items: center; background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 12px; text-align: left; }
+    .feature-item .icon { font-size: 24px; margin-right: 12px; }
+    .feature-item .text { font-size: 14px; color: #555; }
+    .profile-header { text-align: center; padding: 30px; background: #fff; border-radius: 20px; margin: 20px; }
+    .avatar { width: 100px; height: 100px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .avatar span { font-size: 40px; font-weight: 700; color: #fff; }
+    .user-name { font-size: 24px; font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
+    .user-email { font-size: 16px; color: #7f8c8d; }
+    .logout-btn { margin: 20px; background: #fff; border: 2px solid #e74c3c; color: #e74c3c; padding: 18px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: calc(100% - 40px); }
+    .notification-card { background: #fff; border-radius: 12px; padding: 16px; margin: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); cursor: pointer; }
+    .notification-card.unread { border-left: 4px solid #e74c3c; }
+    .notification-header { display: flex; align-items: center; margin-bottom: 6px; }
+    .notification-title { flex: 1; font-size: 16px; font-weight: 600; color: #2c3e50; }
+    .unread-dot { width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; }
+    .notification-message { font-size: 14px; color: #555; line-height: 20px; margin-bottom: 8px; }
+    .notification-time { font-size: 12px; color: #95a5a6; }
+    .empty-state { text-align: center; padding: 60px 40px; }
+    .empty-state .icon { font-size: 80px; margin-bottom: 20px; }
+    .empty-state .title { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 8px; }
+    .empty-state .text { font-size: 15px; color: #7f8c8d; line-height: 22px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; }
+    .modal-title { font-size: 20px; font-weight: 700; color: #2c3e50; text-align: center; margin-bottom: 20px; }
+    .modal-input { width: 100%; padding: 14px; border: 1px solid #ecf0f1; border-radius: 12px; font-size: 16px; margin-bottom: 12px; background: #f8f9fa; }
+    .modal-textarea { height: 100px; resize: none; }
+    .modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
+    .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; border: none; }
+    .modal-btn.cancel { background: #ecf0f1; color: #7f8c8d; }
+    .modal-btn.submit { background: #3498db; color: #fff; }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; z-index: 2000; display: none; }
+    .toast.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #ecf0f1; border-top-color: #e74c3c; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 12px; color: #7f8c8d; font-size: 16px; }
+    .page { display: none; }
+    .page.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div id="listPage" class="page active">
+      <div class="header"><h1>🧗 Salles d'Escalade</h1><p>Lyon et environs</p></div>
+      <div class="main-content"><div id="gymList" class="gym-list"><div class="loading"><div class="spinner"></div><p class="loading-text">Chargement des salles...</p></div></div></div>
+    </div>
+    <div id="detailPage" class="page"><div class="back-btn" onclick="showList()"><span>← Retour</span></div><div id="gymDetail"></div></div>
+    <div id="subscriptionsPage" class="page"><div class="header"><h1>⭐ Mes salles</h1><p id="subsCount">0 salle suivie</p></div><div id="subsList" class="main-content"></div></div>
+    <div id="notificationsPage" class="page"><div class="header" style="display: flex; justify-content: space-between; align-items: center;"><div><h1>🔔 Notifications</h1><p id="notifCount">Toutes les notifications lues</p></div><span id="markAllRead" style="color: #3498db; font-size: 14px; font-weight: 600; cursor: pointer;">Tout marquer lu</span></div><div id="notifList" class="main-content"></div></div>
+    <div id="profilePage" class="page"><div id="profileContent"></div></div>
+    <nav class="tab-nav">
+      <button class="tab-item active" onclick="showTab('list')"><span class="icon">🧗</span><span class="label">Salles</span></button>
+      <button class="tab-item" onclick="showTab('subscriptions')"><span class="icon">⭐</span><span class="label">Mes salles</span></button>
+      <button class="tab-item" onclick="showTab('notifications')"><span class="icon">🔔</span><span class="label">Notifications</span></button>
+      <button class="tab-item" onclick="showTab('profile')"><span class="icon">👤</span><span class="label">Profil</span></button>
+    </nav>
+  </div>
+  <div id="sectorModal" class="modal-overlay"><div class="modal-content"><h3 class="modal-title">Signaler un changement</h3><input type="text" id="sectorName" class="modal-input" placeholder="Nom du secteur (optionnel)"><textarea id="sectorDesc" class="modal-input modal-textarea" placeholder="Description du changement"></textarea><div class="modal-buttons"><button class="modal-btn cancel" onclick="closeSectorModal()">Annuler</button><button class="modal-btn submit" onclick="submitSectorChange()">Envoyer</button></div></div></div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_URL = '/api';
+    let gyms = [], currentGym = null, user = null, subscriptions = [], notifications = [];
+    const CROWD_LEVELS = [
+      { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢', faceEmoji: '😌' },
+      { level: 2, label: 'Peu fréquenté', color: '#2ecc71', emoji: '🟢', faceEmoji: '🙂' },
+      { level: 3, label: 'Modéré', color: '#f39c12', emoji: '🟡', faceEmoji: '😐' },
+      { level: 4, label: 'Fréquenté', color: '#e67e22', emoji: '🟠', faceEmoji: '😅' },
+      { level: 5, label: 'Très fréquenté', color: '#e74c3c', emoji: '🔴', faceEmoji: '😰' },
+    ];
+    
+    function loadUser() { const s = localStorage.getItem('user'); if (s) user = JSON.parse(s); }
+    function saveUser(u) { user = u; localStorage.setItem('user', JSON.stringify(u)); }
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('active'); setTimeout(() => t.classList.remove('active'), 3000); }
+    
+    function showTab(tab) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      const idx = { list: 0, subscriptions: 1, notifications: 2, profile: 3 };
+      document.querySelectorAll('.tab-item')[idx[tab]].classList.add('active');
+      switch(tab) {
+        case 'list': document.getElementById('listPage').classList.add('active'); break;
+        case 'subscriptions': document.getElementById('subscriptionsPage').classList.add('active'); loadSubscriptions(); break;
+        case 'notifications': document.getElementById('notificationsPage').classList.add('active'); loadNotifications(); break;
+        case 'profile': document.getElementById('profilePage').classList.add('active'); renderProfile(); break;
+      }
+    }
+    
+    async function fetchGyms() {
+      try {
+        const res = await fetch(`${API_URL}/gyms`);
+        gyms = await res.json();
+        renderGymList();
+      } catch (err) {
+        document.getElementById('gymList').innerHTML = '<div class="empty-state"><div class="icon">❌</div><div class="title">Erreur de chargement</div></div>';
+      }
+    }
+    
+    function renderGymList() {
+      document.getElementById('gymList').innerHTML = gyms.map(gym => {
+        const c = CROWD_LEVELS.find(x => x.level === gym.crowdLevel) || CROWD_LEVELS[2];
+        return `<div class="gym-card" onclick="showDetail('${gym.id}')">
+          <img src="${gym.image}" onerror="this.src='https://via.placeholder.com/400x160?text=🧗'">
+          ${gym.sectorChangedRecently ? '<div class="new-badge">🆕 Nouveau secteur</div>' : ''}
+          <div class="content"><div class="name">${gym.name}</div><div class="address">${gym.address}</div>
+          <div class="footer"><div class="price-container"><div class="price-label">Entrée</div><div class="price">${gym.pricing.singleEntry}</div></div>
+          <div class="crowd-badge" style="background:${c.color}20;color:${c.color}"><span>${c.emoji}</span> ${c.label}</div></div>
+          <div class="features">${gym.features.slice(0,3).map(f=>`<span class="feature-tag">${f}</span>`).join('')}</div></div></div>`;
+      }).join('');
+    }
+    
+    async function showDetail(id) {
+      try {
+        const res = await fetch(`${API_URL}/gyms/${id}`);
+        currentGym = await res.json();
+        renderDetail();
+        document.getElementById('listPage').classList.remove('active');
+        document.getElementById('detailPage').classList.add('active');
+      } catch (err) { console.error(err); }
+    }
+    
+    function showList() {
+      document.getElementById('detailPage').classList.remove('active');
+      document.getElementById('listPage').classList.add('active');
+      fetchGyms();
+    }
+    
+    function isSubscribed(id) { return subscriptions.some(g => g.id === id); }
+    
+    function renderDetail() {
+      const g = currentGym, c = CROWD_LEVELS.find(x => x.level === g.crowdLevel) || CROWD_LEVELS[2], sub = isSubscribed(g.id);
+      document.getElementById('gymDetail').innerHTML = `
+        <img src="${g.image}" class="detail-image" onerror="this.src='https://via.placeholder.com/400x250?text=🧗'">
+        ${g.sectorChangedRecently ? `<div class="alert-banner"><div class="title">🆕 Un secteur a été récemment modifié !</div>${g.lastSectorChange?`<div class="detail">${g.lastSectorChange.sectorName}: ${g.lastSectorChange.description}</div>`:''}</div>` : ''}
+        <div class="detail-content">
+          <div class="detail-header"><div class="detail-title"><h2>${g.name}</h2><div class="address" onclick="openMaps('${g.address}')">📍 ${g.address}</div></div>
+          <button class="subscribe-btn ${sub?'subscribed':''}" onclick="toggleSub('${g.id}')">${sub?'✓ Abonné':'+ Suivre'}</button></div>
+          <div class="crowd-banner" style="background:${c.color}15"><div class="crowd-title">Affluence actuelle</div><div class="crowd-display"><span class="crowd-emoji">${c.emoji}</span><span class="crowd-label" style="color:${c.color}">${c.label}</span></div></div>
+          <p class="description">${g.description}</p>
+          <div class="section"><h3 class="section-title">📞 Contact</h3><a class="link" href="tel:${g.phone}">${g.phone}</a><a class="link" href="${g.website}" target="_blank">🌐 Site web</a></div>
+          <div class="section"><h3 class="section-title">💰 Tarifs</h3><div class="pricing-grid">
+            <div class="price-item"><span class="label">Entrée unique</span><span class="value">${g.pricing.singleEntry}</span></div>
+            <div class="price-item"><span class="label">Carte 10 séances</span><span class="value">${g.pricing.tenSessions}</span></div>
+            <div class="price-item"><span class="label">Abonnement mensuel</span><span class="value">${g.pricing.monthlyUnlimited}</span></div>
+            <div class="price-item"><span class="label">Abonnement annuel</span><span class="value">${g.pricing.yearlySubscription}</span></div>
+            <div class="price-item"><span class="label">Location matériel</span><span class="value">${g.pricing.equipmentRental}</span></div>
+          </div></div>
+          <div class="section"><h3 class="section-title">🕐 Horaires</h3>${Object.entries(g.openingHours).map(([d,h])=>`<div class="schedule-row"><span class="day">${d.charAt(0).toUpperCase()+d.slice(1)}</span><span class="hours">${h}</span></div>`).join('')}</div>
+          <div class="section"><h3 class="section-title">✨ Équipements</h3><div class="features-container">${g.features.map(f=>`<span class="feature-tag">${f}</span>`).join('')}</div></div>
+          <div class="contribution-section"><h3 class="contribution-title">🤝 Contribuez</h3>
+            <div class="crowd-selector"><div class="title">Quelle est l'affluence actuelle ?</div>
+            <div class="levels-container">${CROWD_LEVELS.map(x=>`<button class="level-btn ${g.crowdLevel===x.level?'selected':''}" style="${g.crowdLevel===x.level?`background:${x.color};border-color:${x.color};color:white;`:''}" onclick="updateCrowd(${x.level})" ${!user?'disabled':''}><span class="emoji">${x.faceEmoji}</span><span class="text">${x.label}</span></button>`).join('')}</div></div>
+            <button class="report-btn" onclick="openSectorModal()" ${!user?'disabled':''}>🔄 Signaler un changement de secteur</button>
+            ${!user?'<p class="login-hint">Connectez-vous pour contribuer</p>':''}
+          </div>
+        </div>`;
+    }
+    
+    function openMaps(addr) { window.open(`https://maps.google.com/?q=${encodeURIComponent(addr)}`, '_blank'); }
+    
+    async function toggleSub(id) {
+      if (!user) { showToast('Connectez-vous pour suivre cette salle'); showTab('profile'); return; }
+      try {
+        if (isSubscribed(id)) {
+          await fetch(`${API_URL}/subscriptions/${user.id}/${id}`, { method: 'DELETE' });
+          showToast('Vous ne suivez plus cette salle');
+        } else {
+          await fetch(`${API_URL}/subscriptions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, gymId: id }) });
+          showToast('Vous suivez maintenant cette salle !');
+        }
+        await loadSubscriptions();
+        renderDetail();
+      } catch (err) { showToast('Erreur'); }
+    }
+    
+    async function updateCrowd(level) {
+      if (!user) { showToast('Connectez-vous pour mettre à jour'); showTab('profile'); return; }
+      try {
+        const res = await fetch(`${API_URL}/gyms/${currentGym.id}/crowd`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, crowdLevel: level }) });
+        const data = await res.json();
+        currentGym = data.gym;
+        renderDetail();
+        showToast('Merci pour votre contribution !');
+      } catch (err) { showToast('Erreur'); }
+    }
+    
+    function openSectorModal() { if (!user) { showToast('Connectez-vous'); showTab('profile'); return; } document.getElementById('sectorModal').classList.add('active'); }
+    function closeSectorModal() { document.getElementById('sectorModal').classList.remove('active'); document.getElementById('sectorName').value = ''; document.getElementById('sectorDesc').value = ''; }
+    
+    async function submitSectorChange() {
+      const name = document.getElementById('sectorName').value, desc = document.getElementById('sectorDesc').value;
+      try {
+        const res = await fetch(`${API_URL}/gyms/${currentGym.id}/sector-change`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, sectorName: name, description: desc }) });
+        const data = await res.json();
+        currentGym = data.gym;
+        closeSectorModal();
+        renderDetail();
+        showToast(`Changement signalé. ${data.notifiedUsers} abonné(s) notifié(s)`);
+      } catch (err) { showToast('Erreur'); }
+    }
+    
+    async function loadSubscriptions() {
+      if (!user) { subscriptions = []; renderSubscriptions(); return; }
+      try { const res = await fetch(`${API_URL}/subscriptions/${user.id}`); subscriptions = await res.json(); renderSubscriptions(); } catch (err) {}
+    }
+    
+    function renderSubscriptions() {
+      const cnt = document.getElementById('subsCount'), lst = document.getElementById('subsList');
+      if (!user) { cnt.textContent = ''; lst.innerHTML = '<div class="empty-state"><div class="icon">🔒</div><div class="title">Connexion requise</div><div class="text">Connectez-vous pour voir vos salles suivies</div></div>'; return; }
+      cnt.textContent = `${subscriptions.length} salle${subscriptions.length!==1?'s':''} suivie${subscriptions.length!==1?'s':''}`;
+      if (subscriptions.length === 0) { lst.innerHTML = '<div class="empty-state"><div class="icon">🧗</div><div class="title">Aucune salle suivie</div><div class="text">Abonnez-vous à vos salles préférées</div></div>'; }
+      else { lst.innerHTML = `<div class="gym-list">${subscriptions.map(g => { const c = CROWD_LEVELS.find(x=>x.level===g.crowdLevel)||CROWD_LEVELS[2]; return `<div class="gym-card" onclick="showDetail('${g.id}')"><img src="${g.image}" onerror="this.src='https://via.placeholder.com/400x160?text=🧗'">${g.sectorChangedRecently?'<div class="new-badge">🆕 Nouveau secteur</div>':''}<div class="content"><div class="name">${g.name}</div><div class="address">${g.address}</div><div class="footer"><div class="price-container"><div class="price-label">Entrée</div><div class="price">${g.pricing.singleEntry}</div></div><div class="crowd-badge" style="background:${c.color}20;color:${c.color}"><span>${c.emoji}</span> ${c.label}</div></div></div></div>`; }).join('')}</div>`; }
+    }
+    
+    async function loadNotifications() {
+      if (!user) { notifications = []; renderNotifications(); return; }
+      try { const res = await fetch(`${API_URL}/notifications/${user.id}`); notifications = await res.json(); renderNotifications(); } catch (err) {}
+    }
+    
+    function renderNotifications() {
+      const cnt = document.getElementById('notifCount'), lst = document.getElementById('notifList'), btn = document.getElementById('markAllRead');
+      if (!user) { cnt.textContent = ''; btn.style.display = 'none'; lst.innerHTML = '<div class="empty-state"><div class="icon">🔒</div><div class="title">Connexion requise</div><div class="text">Connectez-vous pour voir vos notifications</div></div>'; return; }
+      const unread = notifications.filter(n=>!n.read).length;
+      cnt.textContent = unread > 0 ? `${unread} nouvelle${unread!==1?'s':''} notification${unread!==1?'s':''}` : 'Toutes les notifications lues';
+      btn.style.display = unread > 0 ? 'block' : 'none';
+      if (notifications.length === 0) { lst.innerHTML = '<div class="empty-state"><div class="icon">🔕</div><div class="title">Aucune notification</div><div class="text">Suivez des salles pour recevoir des notifications</div></div>'; }
+      else { lst.innerHTML = notifications.map(n=>`<div class="notification-card ${!n.read?'unread':''}" onclick="handleNotif('${n.id}','${n.gymId}')"><div class="notification-header"><span class="notification-title">${n.title}</span>${!n.read?'<span class="unread-dot"></span>':''}</div><div class="notification-message">${n.message}</div><div class="notification-time">${formatDate(n.createdAt)}</div></div>`).join(''); }
+    }
+    
+    function formatDate(d) { const dt = new Date(d), now = new Date(), diff = now - dt, mins = Math.floor(diff/60000), hrs = Math.floor(diff/3600000), days = Math.floor(diff/86400000); if (mins<1) return 'À l\'instant'; if (mins<60) return `Il y a ${mins} min`; if (hrs<24) return `Il y a ${hrs}h`; if (days<7) return `Il y a ${days}j`; return dt.toLocaleDateString('fr-FR'); }
+    
+    async function handleNotif(nid, gid) { try { await fetch(`${API_URL}/notifications/${nid}/read`, { method: 'PUT' }); await showDetail(gid); } catch (err) {} }
+    
+    document.getElementById('markAllRead').addEventListener('click', async () => { if (!user) return; try { await fetch(`${API_URL}/notifications/${user.id}/read-all`, { method: 'PUT' }); await loadNotifications(); } catch (err) {} });
+    
+    function renderProfile() {
+      const el = document.getElementById('profileContent');
+      if (user) {
+        el.innerHTML = `<div class="profile-header"><div class="avatar"><span>${user.name.charAt(0).toUpperCase()}</span></div><div class="user-name">${user.name}</div><div class="user-email">${user.email}</div></div>
+        <div style="padding:0 20px;"><div class="section"><h3 class="section-title">📱 À propos de l'app</h3><div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;"><div style="font-weight:600;margin-bottom:8px;">🧗 Salles d'Escalade Lyon</div><div style="font-size:14px;color:#7f8c8d;">Découvrez les salles d'escalade de Lyon et contribuez à la communauté.</div></div></div></div>
+        <button class="logout-btn" onclick="logout()">Se déconnecter</button>`;
+      } else {
+        el.innerHTML = `<div class="login-container"><div class="login-icon">🧗</div><h2 class="login-title">Bienvenue !</h2><p class="login-subtitle">Connectez-vous pour suivre vos salles préférées et contribuer à la communauté</p>
+        <div class="form-group"><label>Adresse email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
+        <button class="login-btn" onclick="login()">Se connecter</button>
+        <div class="feature-list"><div class="feature-item"><span class="icon">📍</span><span class="text">Découvrez les salles d'escalade de Lyon</span></div><div class="feature-item"><span class="icon">🔔</span><span class="text">Recevez les notifications de nouveaux secteurs</span></div><div class="feature-item"><span class="icon">📊</span><span class="text">Partagez l'affluence en temps réel</span></div></div></div>`;
+      }
+    }
+    
+    async function login() {
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      if (!email) { showToast('Veuillez entrer votre email'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Email invalide'); return; }
+      try {
+        const res = await fetch(`${API_URL}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const data = await res.json();
+        saveUser(data.user);
+        showToast(`Bienvenue, ${data.user.name} !`);
+        renderProfile();
+        loadSubscriptions();
+      } catch (err) { showToast('Erreur de connexion'); }
+    }
+    
+    function logout() { user = null; subscriptions = []; notifications = []; localStorage.removeItem('user'); showToast('Déconnexion réussie'); renderProfile(); }
+    
+    loadUser();
+    fetchGyms();
+    loadSubscriptions();
+  </script>
+</body>
+</html>
