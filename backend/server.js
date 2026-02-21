@@ -174,8 +174,8 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
 
-  // Update crowd level (average with previous)
-  gym.crowdLevel = Math.round((gym.crowdLevel + crowdLevel) / 2);
+  // Update crowd 
+  gym.crowdLevel = crowdLevel;
 
   // Log the update
   const update = {
