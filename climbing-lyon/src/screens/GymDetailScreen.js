@@ -35,7 +35,7 @@ const CROWD_LEVELS = [
 const GymDetailScreen = ({ route, navigation }) => {
   const { gymId } = route.params;
   const { user } = useAuth();
-  
+
   const [gym, setGym] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -211,7 +211,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={{ uri: gym.image }} style={styles.image} />
-      
+
       {gym.sectorChangedRecently && (
         <View style={styles.alertBanner}>
           <Text style={styles.alertText}>🆕 Un secteur a été récemment modifié !</Text>
@@ -231,7 +231,7 @@ const GymDetailScreen = ({ route, navigation }) => {
               <Text style={styles.address}>📍 {gym.address}</Text>
             </TouchableOpacity>
           </View>
-          
+
           <TouchableOpacity
             style={[styles.subscribeButton, isSubscribed && styles.subscribedButton]}
             onPress={handleSubscribe}
@@ -241,6 +241,32 @@ const GymDetailScreen = ({ route, navigation }) => {
               {isSubscribed ? '✓ Abonné' : '+ Suivre'}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.contributionSection}>
+          <Text style={styles.contributionTitle}>🤝 Contribuez</Text>
+
+          <CrowdSelector
+            selectedLevel={selectedCrowd}
+            onSelect={handleCrowdUpdate}
+            disabled={!user || updating}
+          />
+
+          <TouchableOpacity
+            style={styles.reportButton}
+            onPress={handleReportSectorChange}
+            disabled={updating}
+          >
+            <Text style={styles.reportButtonText}>
+              🔄 Signaler un changement de secteur
+            </Text>
+          </TouchableOpacity>
+
+          {!user && (
+            <Text style={styles.loginHint}>
+              Connectez-vous pour contribuer
+            </Text>
+          )}
         </View>
 
         <View style={[styles.crowdBanner, { backgroundColor: crowdInfo.color + '15' }]}>
@@ -313,32 +339,6 @@ const GymDetailScreen = ({ route, navigation }) => {
             ))}
           </View>
         </View>
-
-        <View style={styles.contributionSection}>
-          <Text style={styles.contributionTitle}>🤝 Contribuez</Text>
-          
-          <CrowdSelector
-            selectedLevel={selectedCrowd}
-            onSelect={handleCrowdUpdate}
-            disabled={!user || updating}
-          />
-
-          <TouchableOpacity
-            style={styles.reportButton}
-            onPress={handleReportSectorChange}
-            disabled={updating}
-          >
-            <Text style={styles.reportButtonText}>
-              🔄 Signaler un changement de secteur
-            </Text>
-          </TouchableOpacity>
-          
-          {!user && (
-            <Text style={styles.loginHint}>
-              Connectez-vous pour contribuer
-            </Text>
-          )}
-        </View>
       </View>
 
       <Modal
@@ -350,14 +350,14 @@ const GymDetailScreen = ({ route, navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Signaler un changement</Text>
-            
+
             <TextInput
               style={styles.input}
               placeholder="Nom du secteur (optionnel)"
               value={sectorName}
               onChangeText={setSectorName}
             />
-            
+
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Description du changement"
@@ -374,7 +374,7 @@ const GymDetailScreen = ({ route, navigation }) => {
               >
                 <Text style={styles.modalCancelText}>Annuler</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={styles.modalSubmitButton}
                 onPress={submitSectorChange}
