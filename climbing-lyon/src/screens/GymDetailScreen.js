@@ -12,6 +12,7 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import CrowdSelector from '../components/CrowdSelector';
@@ -44,12 +45,23 @@ const GymDetailScreen = ({ route, navigation }) => {
   const [sectorModalVisible, setSectorModalVisible] = useState(false);
   const [sectorName, setSectorName] = useState('');
   const [sectorDescription, setSectorDescription] = useState('');
+  const [showSectorAlert, setShowSectorAlert] = useState(true);
 
   const loadGym = async () => {
     try {
       const data = await getGym(gymId);
       setGym(data);
       setSelectedCrowd(data.crowdLevel);
+
+      // Vérifier si l'utilisateur a déjà masqué cette notification pour cette version
+      if (data.sectorChangedRecently && data.lastSectorChange) {
+        const dismissedTimestamp = await AsyncStorage.getItem(`dismissed_alert_${gymId}`);
+        if (dismissedTimestamp === data.lastSectorChange.timestamp) {
+          setShowSectorAlert(false);
+        } else {
+          setShowSectorAlert(true);
+        }
+      }
     } catch (error) {
       console.error('Erreur chargement salle:', error);
       Alert.alert('Erreur', 'Impossible de charger les détails de la salle');
@@ -212,14 +224,27 @@ const GymDetailScreen = ({ route, navigation }) => {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={{ uri: gym.image }} style={styles.image} />
 
-      {gym.sectorChangedRecently && (
+      {gym.sectorChangedRecently && showSectorAlert && (
         <View style={styles.alertBanner}>
-          <Text style={styles.alertText}>🆕 Un secteur a été récemment modifié !</Text>
-          {gym.lastSectorChange && (
-            <Text style={styles.alertDetail}>
-              {gym.lastSectorChange.sectorName}: {gym.lastSectorChange.description}
-            </Text>
-          )}
+          <View style={styles.alertContent}>
+            <Text style={styles.alertText}>🆕 Un secteur a été récemment modifié !</Text>
+            {gym.lastSectorChange && (
+              <Text style={styles.alertDetail}>
+                {gym.lastSectorChange.sectorName}: {gym.lastSectorChange.description}
+              </Text>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.closeAlertButton}
+            onPress={async () => {
+              setShowSectorAlert(false);
+              if (gym?.lastSectorChange?.timestamp) {
+                await AsyncStorage.setItem(`dismissed_alert_${gymId}`, gym.lastSectorChange.timestamp);
+              }
+            }}
+          >
+            <Text style={styles.closeAlertText}>✕</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -410,6 +435,12 @@ const styles = StyleSheet.create({
   alertBanner: {
     backgroundColor: '#e74c3c',
     padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  alertContent: {
+    flex: 1,
   },
   alertText: {
     color: '#fff',
@@ -423,6 +454,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
     opacity: 0.9,
+  },
+  closeAlertButton: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  closeAlertText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
   },
   content: {
     padding: 20,
