@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import GymCard from '../components/GymCard';
 import { getGyms } from '../services/api';
@@ -23,7 +24,19 @@ const HomeScreen = ({ navigation }) => {
     try {
       setError(null);
       const data = await getGyms();
-      setGyms(data);
+
+      // Synchroniser l'état de masquage des alertes de secteur
+      const updatedGyms = await Promise.all(data.map(async (gym) => {
+        if (gym.sectorChangedRecently && gym.lastSectorChange) {
+          const dismissedTimestamp = await AsyncStorage.getItem(`dismissed_alert_${gym.id}`);
+          if (dismissedTimestamp === gym.lastSectorChange.timestamp) {
+            return { ...gym, sectorChangedRecently: false };
+          }
+        }
+        return gym;
+      }));
+
+      setGyms(updatedGyms);
     } catch (err) {
       console.error('Erreur chargement salles:', err);
       setError('Impossible de charger les salles. Vérifiez votre connexion.');
@@ -77,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>🧗 Salles d'Escalade</Text>
         <Text style={styles.headerSubtitle}>Lyon et environs</Text>
       </View>
-      
+
       <FlatList
         data={gyms}
         keyExtractor={(item) => item.id}
