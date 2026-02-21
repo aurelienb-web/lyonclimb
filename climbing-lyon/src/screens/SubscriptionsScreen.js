@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import GymCard from '../components/GymCard';
@@ -24,10 +25,22 @@ const SubscriptionsScreen = ({ navigation }) => {
       setLoading(false);
       return;
     }
-    
+
     try {
       const data = await getUserSubscriptions(user.id);
-      setSubscriptions(data);
+
+      // Synchroniser l'état de masquage des alertes de secteur
+      const updatedSubscriptions = await Promise.all(data.map(async (gym) => {
+        if (gym.sectorChangedRecently && gym.lastSectorChange) {
+          const dismissedTimestamp = await AsyncStorage.getItem(`dismissed_alert_${gym.id}`);
+          if (dismissedTimestamp === gym.lastSectorChange.timestamp) {
+            return { ...gym, sectorChangedRecently: false };
+          }
+        }
+        return gym;
+      }));
+
+      setSubscriptions(updatedSubscriptions);
     } catch (error) {
       console.error('Erreur chargement abonnements:', error);
     } finally {
