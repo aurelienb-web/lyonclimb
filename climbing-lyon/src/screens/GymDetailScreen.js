@@ -49,9 +49,9 @@ const GymDetailScreen = ({ route, navigation }) => {
 
   const loadGym = async () => {
     try {
-      const data = await getGym(gymId);
+      const data = await getGym(gymId, user?.id);
       setGym(data);
-      setSelectedCrowd(data.crowdLevel);
+      setSelectedCrowd(data.userLastContribution);
 
       // Vérifier si l'utilisateur a déjà masqué cette notification pour cette version
       if (data.sectorChangedRecently && data.lastSectorChange) {
@@ -140,6 +140,7 @@ const GymDetailScreen = ({ route, navigation }) => {
       setUpdating(true);
       const result = await updateCrowdLevel(gymId, user.id, level);
       setGym(result.gym);
+      setSelectedCrowd(level);
       Alert.alert('✓', 'Merci pour votre contribution !');
     } catch (error) {
       Alert.alert('Erreur', 'Impossible de mettre à jour l\'affluence');

@@ -18,8 +18,10 @@ export const getGyms = async () => {
   return response.data;
 };
 
-export const getGym = async (id) => {
-  const response = await api.get(`/gyms/${id}`);
+export const getGym = async (id, userId = null) => {
+  const response = await api.get(`/gyms/${id}`, {
+    params: userId ? { userId } : {}
+  });
   return response.data;
 };
 

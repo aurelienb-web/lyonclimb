@@ -30,17 +30,69 @@ const pushTokens = new Map();
 // GET all gyms
 app.get('/api/gyms', (req, res) => {
   const data = readData();
-  res.json(data.gyms);
+
+  // Recalculate averages for all gyms based on last 2 hours
+  const twoHoursAgo = new Date();
+  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+
+  const updatedGyms = data.gyms.map(gym => {
+    const recentUpdates = data.crowdUpdates.filter(u =>
+      u.gymId === gym.id &&
+      new Date(u.timestamp) > twoHoursAgo
+    );
+
+    if (recentUpdates.length > 0) {
+      const sum = recentUpdates.reduce((acc, u) => acc + u.crowdLevel, 0);
+      return { ...gym, crowdLevel: Math.round(sum / recentUpdates.length) };
+    }
+    return gym;
+  });
+
+  res.json(updatedGyms);
 });
 
 // GET single gym
 app.get('/api/gyms/:id', (req, res) => {
+  const { userId } = req.query;
   const data = readData();
   const gym = data.gyms.find(g => g.id === req.params.id);
+
   if (!gym) {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
-  res.json(gym);
+
+  // Recalculate average crowd level (last 2 hours)
+  const twoHoursAgo = new Date();
+  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+
+  const recentUpdates = data.crowdUpdates.filter(u =>
+    u.gymId === req.params.id &&
+    new Date(u.timestamp) > twoHoursAgo
+  );
+
+  let crowdLevel = gym.crowdLevel;
+  if (recentUpdates.length > 0) {
+    const sum = recentUpdates.reduce((acc, u) => acc + u.crowdLevel, 0);
+    crowdLevel = Math.round(sum / recentUpdates.length);
+  }
+
+  // Get user's last contribution
+  let userLastContribution = null;
+  if (userId) {
+    const userUpdates = data.crowdUpdates
+      .filter(u => u.gymId === req.params.id && u.userId === userId)
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    if (userUpdates.length > 0) {
+      userLastContribution = userUpdates[0].crowdLevel;
+    }
+  }
+
+  res.json({
+    ...gym,
+    crowdLevel,
+    userLastContribution
+  });
 });
 
 // Register user (simple email-based auth)
@@ -52,7 +104,7 @@ app.post('/api/auth/register', (req, res) => {
 
   const data = readData();
   let user = data.users.find(u => u.email === email);
-  
+
   if (!user) {
     user = {
       id: uuidv4(),
@@ -76,7 +128,7 @@ app.post('/api/auth/login', (req, res) => {
 
   const data = readData();
   let user = data.users.find(u => u.email === email);
-  
+
   if (!user) {
     user = {
       id: uuidv4(),
@@ -99,12 +151,12 @@ app.post('/api/subscriptions', (req, res) => {
   }
 
   const data = readData();
-  
+
   // Check if subscription already exists
   const existingSub = data.subscriptions.find(
     s => s.userId === userId && s.gymId === gymId
   );
-  
+
   if (existingSub) {
     return res.status(400).json({ error: 'Déjà abonné à cette salle' });
   }
@@ -132,11 +184,11 @@ app.post('/api/subscriptions', (req, res) => {
 app.delete('/api/subscriptions/:userId/:gymId', (req, res) => {
   const { userId, gymId } = req.params;
   const data = readData();
-  
+
   const index = data.subscriptions.findIndex(
     s => s.userId === userId && s.gymId === gymId
   );
-  
+
   if (index === -1) {
     return res.status(404).json({ error: 'Abonnement non trouvé' });
   }
@@ -169,13 +221,10 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
   const data = readData();
   const gym = data.gyms.find(g => g.id === req.params.id);
-  
+
   if (!gym) {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
-
-  // Update crowd 
-  gym.crowdLevel = crowdLevel;
 
   // Log the update
   const update = {
@@ -186,6 +235,23 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     timestamp: new Date().toISOString()
   };
   data.crowdUpdates.push(update);
+
+  // Recalculate average crowd level (last 2 hours)
+  const twoHoursAgo = new Date();
+  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+
+  const recentUpdates = data.crowdUpdates.filter(u =>
+    u.gymId === req.params.id &&
+    new Date(u.timestamp) > twoHoursAgo
+  );
+
+  if (recentUpdates.length > 0) {
+    const sum = recentUpdates.reduce((acc, u) => acc + u.crowdLevel, 0);
+    gym.crowdLevel = Math.round(sum / recentUpdates.length);
+  } else {
+    gym.crowdLevel = crowdLevel; // Fallback to the latest update if somehow none (shouldn't happen)
+  }
+
   writeData(data);
 
   res.json({ gym, message: 'Affluence mise à jour' });
@@ -200,7 +266,7 @@ app.post('/api/gyms/:id/sector-change', (req, res) => {
 
   const data = readData();
   const gym = data.gyms.find(g => g.id === req.params.id);
-  
+
   if (!gym) {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
@@ -215,7 +281,7 @@ app.post('/api/gyms/:id/sector-change', (req, res) => {
 
   // Create notifications for subscribers
   const subscribers = data.subscriptions.filter(s => s.gymId === req.params.id);
-  
+
   subscribers.forEach(sub => {
     if (sub.userId !== userId) {
       const notification = {
@@ -235,10 +301,10 @@ app.post('/api/gyms/:id/sector-change', (req, res) => {
 
   writeData(data);
 
-  res.json({ 
-    gym, 
+  res.json({
+    gym,
     notifiedUsers: subscribers.length - 1,
-    message: 'Changement de secteur signalé et notifications envoyées' 
+    message: 'Changement de secteur signalé et notifications envoyées'
   });
 });
 
@@ -255,7 +321,7 @@ app.get('/api/notifications/:userId', (req, res) => {
 app.put('/api/notifications/:id/read', (req, res) => {
   const data = readData();
   const notification = data.notifications.find(n => n.id === req.params.id);
-  
+
   if (!notification) {
     return res.status(404).json({ error: 'Notification non trouvée' });
   }
@@ -281,7 +347,7 @@ app.put('/api/notifications/:userId/read-all', (req, res) => {
 app.post('/api/gyms/:id/reset-sector-flag', (req, res) => {
   const data = readData();
   const gym = data.gyms.find(g => g.id === req.params.id);
-  
+
   if (!gym) {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
