@@ -31,19 +31,28 @@ const pushTokens = new Map();
 app.get('/api/gyms', (req, res) => {
   const data = readData();
 
-  // Recalculate averages for all gyms based on last 2 hours
-  const twoHoursAgo = new Date();
-  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+  // Recalculate averages for all gyms based on last 2 hours (latest vote per user)
+  const twoHoursAgo = new Date().getTime() - (2 * 60 * 60 * 1000);
 
   const updatedGyms = data.gyms.map(gym => {
     const recentUpdates = data.crowdUpdates.filter(u =>
       u.gymId === gym.id &&
-      new Date(u.timestamp) > twoHoursAgo
+      new Date(u.timestamp).getTime() > twoHoursAgo
     );
 
     if (recentUpdates.length > 0) {
-      const sum = recentUpdates.reduce((acc, u) => acc + u.crowdLevel, 0);
-      return { ...gym, crowdLevel: Math.round(sum / recentUpdates.length) };
+      // Group by user and take latest vote
+      const latestVotesPerUser = {};
+      recentUpdates.forEach(u => {
+        const timestamp = new Date(u.timestamp).getTime();
+        if (!latestVotesPerUser[u.userId] || timestamp > latestVotesPerUser[u.userId].timestamp) {
+          latestVotesPerUser[u.userId] = { level: u.crowdLevel, timestamp };
+        }
+      });
+
+      const votes = Object.values(latestVotesPerUser);
+      const sum = votes.reduce((acc, v) => acc + v.level, 0);
+      return { ...gym, crowdLevel: Math.round(sum / votes.length) };
     }
     return gym;
   });
@@ -61,22 +70,31 @@ app.get('/api/gyms/:id', (req, res) => {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
 
-  // Recalculate average crowd level (last 2 hours)
-  const twoHoursAgo = new Date();
-  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+  // Recalculate average crowd level (last 2 hours, latest vote per user)
+  const twoHoursAgo = new Date().getTime() - (2 * 60 * 60 * 1000);
 
   const recentUpdates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
-    new Date(u.timestamp) > twoHoursAgo
+    new Date(u.timestamp).getTime() > twoHoursAgo
   );
 
   let crowdLevel = gym.crowdLevel;
   if (recentUpdates.length > 0) {
-    const sum = recentUpdates.reduce((acc, u) => acc + u.crowdLevel, 0);
-    crowdLevel = Math.round(sum / recentUpdates.length);
+    // Group by user and take latest vote
+    const latestVotesPerUser = {};
+    recentUpdates.forEach(u => {
+      const timestamp = new Date(u.timestamp).getTime();
+      if (!latestVotesPerUser[u.userId] || timestamp > latestVotesPerUser[u.userId].timestamp) {
+        latestVotesPerUser[u.userId] = { level: u.crowdLevel, timestamp };
+      }
+    });
+
+    const votes = Object.values(latestVotesPerUser);
+    const sum = votes.reduce((acc, v) => acc + v.level, 0);
+    crowdLevel = Math.round(sum / votes.length);
   }
 
-  // Get user's last contribution
+  // Get user's last contribution (ever, or could be last 24h)
   let userLastContribution = null;
   if (userId) {
     const userUpdates = data.crowdUpdates
@@ -236,20 +254,33 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
   };
   data.crowdUpdates.push(update);
 
-  // Recalculate average crowd level (last 2 hours)
-  const twoHoursAgo = new Date();
-  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+  // Recalculate average crowd level (last 2 hours, latest vote per user)
+  const now = new Date().getTime();
+  const twoHoursAgo = now - (2 * 60 * 60 * 1000);
 
   const recentUpdates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
-    new Date(u.timestamp) > twoHoursAgo
+    new Date(u.timestamp).getTime() > twoHoursAgo
   );
 
+  console.log(`[Gym ${req.params.id}] Calculating average from ${recentUpdates.length} recent updates`);
+
   if (recentUpdates.length > 0) {
-    const sum = recentUpdates.reduce((acc, u) => acc + u.crowdLevel, 0);
-    gym.crowdLevel = Math.round(sum / recentUpdates.length);
+    // Group by user and take latest vote
+    const latestVotesPerUser = {};
+    recentUpdates.forEach(u => {
+      const ts = new Date(u.timestamp).getTime();
+      if (!latestVotesPerUser[u.userId] || ts > latestVotesPerUser[u.userId].timestamp) {
+        latestVotesPerUser[u.userId] = { level: u.crowdLevel, timestamp: ts };
+      }
+    });
+
+    const votes = Object.values(latestVotesPerUser);
+    const sum = votes.reduce((acc, v) => acc + v.level, 0);
+    gym.crowdLevel = Math.round(sum / votes.length);
+    console.log(`[Gym ${req.params.id}] New average: ${gym.crowdLevel} (from ${votes.length} users)`);
   } else {
-    gym.crowdLevel = crowdLevel; // Fallback to the latest update if somehow none (shouldn't happen)
+    gym.crowdLevel = crowdLevel;
   }
 
   writeData(data);

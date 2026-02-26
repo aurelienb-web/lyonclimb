@@ -30,12 +30,12 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 5,
+      "crowdLevel": 1,
       "lastSectorChange": {
-        "sectorName": "dalle",
+        "sectorName": "devers",
         "description": "Un secteur a été modifié",
         "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
-        "timestamp": "2026-02-17T19:11:32.835Z"
+        "timestamp": "2026-02-26T21:16:31.636Z"
       },
       "sectorChangedRecently": true
     },
@@ -242,11 +242,11 @@
   ],
   "subscriptions": [
     {
-      "id": "317aedfb-df60-47a5-823d-fe01b2553679",
+      "id": "bf54ebaf-9443-403e-8687-df239635200c",
       "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
       "gymId": "1",
       "pushToken": null,
-      "createdAt": "2026-02-21T11:03:53.819Z"
+      "createdAt": "2026-02-26T21:05:01.836Z"
     }
   ],
   "notifications": [],
@@ -432,6 +432,62 @@
       "userId": "4b4f00da-e202-4688-b44f-ed7e4161e283",
       "crowdLevel": 5,
       "timestamp": "2026-02-26T20:00:25.449Z"
+    },
+    {
+      "id": "c45c8e1c-b919-49d4-8777-25306d04852b",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-02-26T20:06:44.422Z"
+    },
+    {
+      "id": "1291b83c-64b7-43d7-b1e2-460f75125485",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 4,
+      "timestamp": "2026-02-26T20:07:12.521Z"
+    },
+    {
+      "id": "847f9404-3a15-485f-a72d-39be11891220",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 5,
+      "timestamp": "2026-02-26T20:07:17.106Z"
+    },
+    {
+      "id": "6d023368-05f2-42e8-a897-de8de22a3f78",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-02-26T20:08:08.099Z"
+    },
+    {
+      "id": "43fed23b-da11-4abb-bc68-707bd4392625",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 4,
+      "timestamp": "2026-02-26T20:08:16.771Z"
+    },
+    {
+      "id": "e505808a-d4aa-4e44-9712-2b845b282bdb",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 3,
+      "timestamp": "2026-02-26T20:08:38.780Z"
+    },
+    {
+      "id": "48e9d5b2-2bea-457b-ba9c-f52cfc1a4b29",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-02-26T21:05:02.614Z"
+    },
+    {
+      "id": "18da6ee0-ba75-4f44-b534-d8337769774b",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-02-26T21:16:24.214Z"
     }
   ]
 }
