@@ -51,13 +51,10 @@ const ProfileScreen = () => {
   };
 
   const handleLogout = async () => {
-    console.log('Logout button clicked - initializing logout process');
     try {
       await logout();
-      console.log('Logout function execution completed successfully');
       setEmail('');
     } catch (error) {
-      console.error('Logout failed with error:', error);
       Alert.alert('Erreur', 'Impossible de se déconnecter');
     }
   };
@@ -98,20 +95,6 @@ const ProfileScreen = () => {
               <Text style={styles.infoText}>
                 Partagez l'affluence en temps réel et signalez les nouveaux secteurs pour aider la communauté.
               </Text>
-            </View>
-          </View>
-
-          <View style={styles.statsSection}>
-            <Text style={styles.sectionTitle}>📊 Vos statistiques</Text>
-            <View style={styles.statsGrid}>
-              <View style={styles.statCard}>
-                <Text style={styles.statNumber}>-</Text>
-                <Text style={styles.statLabel}>Salles suivies</Text>
-              </View>
-              <View style={styles.statCard}>
-                <Text style={styles.statNumber}>-</Text>
-                <Text style={styles.statLabel}>Contributions</Text>
-              </View>
             </View>
           </View>
 
