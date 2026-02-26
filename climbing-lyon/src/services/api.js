@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const API_BASE_URL = 'https://work-1-qvlwqbjsnisnedpv.prod-runtime.all-hands.dev/api';
-const API_BASE_URL = 'http://localhost:8081';
+const API_BASE_URL = 'http://192.168.1.11:12000/api';
 
 
 const api = axios.create({
