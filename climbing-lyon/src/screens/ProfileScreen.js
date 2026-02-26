@@ -56,10 +56,13 @@ const ProfileScreen = () => {
       'Êtes-vous sûr de vouloir vous déconnecter ?',
       [
         { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Déconnexion', 
+        {
+          text: 'Déconnexion',
           style: 'destructive',
-          onPress: logout 
+          onPress: async () => {
+            await logout();
+            setEmail('');
+          }
         },
       ]
     );
@@ -81,7 +84,7 @@ const ProfileScreen = () => {
 
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>📱 À propos de l'app</Text>
-            
+
             <View style={styles.infoCard}>
               <Text style={styles.infoTitle}>🧗 Salles d'Escalade Lyon</Text>
               <Text style={styles.infoText}>
@@ -130,7 +133,7 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
