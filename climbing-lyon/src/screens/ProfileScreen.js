@@ -50,22 +50,16 @@ const ProfileScreen = () => {
     }
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Déconnexion',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            setEmail('');
-          }
-        },
-      ]
-    );
+  const handleLogout = async () => {
+    console.log('Logout button clicked - initializing logout process');
+    try {
+      await logout();
+      console.log('Logout function execution completed successfully');
+      setEmail('');
+    } catch (error) {
+      console.error('Logout failed with error:', error);
+      Alert.alert('Erreur', 'Impossible de se déconnecter');
+    }
   };
 
   if (user) {
