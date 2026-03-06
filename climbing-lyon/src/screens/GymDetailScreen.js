@@ -308,7 +308,7 @@ const GymDetailScreen = ({ route, navigation }) => {
         </View>
 
         <View style={[styles.crowdBanner, { backgroundColor: crowdInfo.color + '15' }]}>
-          <Text style={styles.crowdTitle}>Affluence actuelle</Text>
+          <Text style={styles.crowdTitle}>Affluence actuelle (moyenne des contributions)</Text>
           <View style={styles.crowdDisplay}>
             <Text style={styles.crowdEmoji}>{crowdInfo.emoji}</Text>
             <Text style={[styles.crowdLabel, { color: crowdInfo.color }]}>

@@ -24,6 +24,44 @@ function writeData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
+// Clean up old data (crowd updates > 24h, sector changes > 7 days)
+function cleanUpOldData() {
+  console.log('🧹 Exécution du nettoyage des données...');
+  const data = readData();
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+  const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+
+  let changes = false;
+
+  // 1. Clean crowd updates (> 24h)
+  const initialCrowdCount = data.crowdUpdates.length;
+  data.crowdUpdates = data.crowdUpdates.filter(u => new Date(u.timestamp) > twentyFourHoursAgo);
+  if (data.crowdUpdates.length !== initialCrowdCount) {
+    console.log(`✅ Supprimé ${initialCrowdCount - data.crowdUpdates.length} mises à jour d'affluence obsolètes.`);
+    changes = true;
+  }
+
+  // 2. Clean sector changes (> 7 days)
+  data.gyms.forEach(gym => {
+    if (gym.lastSectorChange && gym.lastSectorChange.timestamp) {
+      if (new Date(gym.lastSectorChange.timestamp) < sevenDaysAgo) {
+        console.log(`✅ Réinitialisation du secteur pour la salle: ${gym.name} (datant du ${gym.lastSectorChange.timestamp})`);
+        gym.lastSectorChange = null;
+        gym.sectorChangedRecently = false;
+        changes = true;
+      }
+    }
+  });
+
+  if (changes) {
+    writeData(data);
+    console.log('💾 Données nettoyées et sauvegardées.');
+  } else {
+    console.log('✨ Aucune donnée obsolète à nettoyer.');
+  }
+}
+
 // Store push tokens for notifications
 const pushTokens = new Map();
 
@@ -465,6 +503,10 @@ app.get('/api-docs', (req, res) => {
     </html>
   `);
 });
+
+// Initial layout and scheduling of cleanup
+cleanUpOldData();
+setInterval(cleanUpOldData, 60 * 60 * 1000); // Every hour
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🧗 Serveur démarré sur le port ${PORT}`);
