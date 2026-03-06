@@ -31,8 +31,8 @@ const pushTokens = new Map();
 app.get('/api/gyms', (req, res) => {
   const data = readData();
 
-  // Recalculate averages for all gyms based on last 2 hours (latest vote per user)
-  const twoHoursAgo = new Date().getTime() - (2 * 60 * 60 * 1000);
+  // Recalculate averages for all gyms based on last 30 minutes (latest vote per user)
+  const twoHoursAgo = new Date().getTime() - (30 * 60 * 1000);
 
   const updatedGyms = data.gyms.map(gym => {
     const recentUpdates = data.crowdUpdates.filter(u =>
@@ -70,8 +70,8 @@ app.get('/api/gyms/:id', (req, res) => {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
 
-  // Recalculate average crowd level (last 2 hours, latest vote per user)
-  const twoHoursAgo = new Date().getTime() - (2 * 60 * 60 * 1000);
+  // Recalculate average crowd level (last 30 minutes, latest vote per user)
+  const twoHoursAgo = new Date().getTime() - (30 * 60 * 1000);
 
   const recentUpdates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
@@ -254,9 +254,9 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
   };
   data.crowdUpdates.push(update);
 
-  // Recalculate average crowd level (last 2 hours, latest vote per user)
+  // Recalculate average crowd level (last 30 minutes, latest vote per user)
   const now = new Date().getTime();
-  const twoHoursAgo = now - (2 * 60 * 60 * 1000);
+  const twoHoursAgo = now - (30 * 60 * 1000);
 
   const recentUpdates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&

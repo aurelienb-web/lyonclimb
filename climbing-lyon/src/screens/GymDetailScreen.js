@@ -135,14 +135,17 @@ const GymDetailScreen = ({ route, navigation }) => {
       return;
     }
 
+    const previousCrowd = selectedCrowd;
     setSelectedCrowd(level);
     try {
       setUpdating(true);
       const result = await updateCrowdLevel(gymId, user.id, level);
-      setGym(result.gym);
-      setSelectedCrowd(level);
-      Alert.alert('✓', 'Merci pour votre contribution !');
+      // Met à jour la salle (crowdLevel = moyenne calculée côté serveur)
+      setGym(prev => ({ ...prev, crowdLevel: result.gym.crowdLevel }));
+      // selectedCrowd reste sur le niveau cliqué par l'utilisateur
     } catch (error) {
+      // Rollback en cas d'erreur
+      setSelectedCrowd(previousCrowd);
       Alert.alert('Erreur', 'Impossible de mettre à jour l\'affluence');
     } finally {
       setUpdating(false);
@@ -277,6 +280,15 @@ const GymDetailScreen = ({ route, navigation }) => {
             onSelect={handleCrowdUpdate}
             disabled={!user || updating}
           />
+
+          {selectedCrowd && user && (() => {
+            const myInfo = CROWD_LEVELS.find(c => c.level === selectedCrowd);
+            return myInfo ? (
+              <Text style={styles.myContributionText}>
+                {updating ? '⏳ Envoi...' : `✓ Votre contribution : ${myInfo.emoji} ${myInfo.label}`}
+              </Text>
+            ) : null;
+          })()}
 
           <TouchableOpacity
             style={styles.reportButton}
@@ -625,6 +637,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  myContributionText: {
+    textAlign: 'center',
+    color: '#27ae60',
+    fontWeight: '600',
+    fontSize: 14,
+    marginTop: 10,
   },
   loginHint: {
     textAlign: 'center',
