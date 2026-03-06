@@ -31,8 +31,21 @@
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
       "crowdLevel": 1,
-      "lastSectorChange": null,
-      "sectorChangedRecently": false
+      "lastSectorChange": {
+        "sectorName": "Secteur Test Final",
+        "description": "Verification finale",
+        "reportedBy": "4b4f00da-e202-4688-b44f-ed7e4161e283",
+        "timestamp": "2026-03-06T19:10:49.599Z"
+      },
+      "sectorChangedRecently": true,
+      "sectorChanges": [
+        {
+          "sectorName": "Secteur Test Final",
+          "description": "Verification finale",
+          "reportedBy": "4b4f00da-e202-4688-b44f-ed7e4161e283",
+          "timestamp": "2026-03-06T19:10:49.599Z"
+        }
+      ]
     },
     {
       "id": "2",
@@ -244,6 +257,51 @@
       "createdAt": "2026-02-26T21:05:01.836Z"
     }
   ],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "4398cf2a-9e64-4479-ab19-8840799d5e30",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : Secteur Test. Ceci est une description de test",
+      "read": false,
+      "createdAt": "2026-03-06T19:00:28.681Z"
+    },
+    {
+      "id": "5be17950-3fa1-4af2-b285-becd29fae858",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : Secteur Test 2. Deuxi�me test",
+      "read": false,
+      "createdAt": "2026-03-06T19:04:05.994Z"
+    },
+    {
+      "id": "30a74f88-88de-43c5-b68c-d333b2a61875",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : Secteur Test 3. Troisi�me test",
+      "read": false,
+      "createdAt": "2026-03-06T19:09:00.344Z"
+    },
+    {
+      "id": "3f5e34bc-08f1-4236-86c6-63412e8ac380",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : Secteur Test Final. Verification finale",
+      "read": false,
+      "createdAt": "2026-03-06T19:10:49.600Z"
+    }
+  ],
   "crowdUpdates": []
 }

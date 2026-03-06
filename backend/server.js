@@ -44,13 +44,27 @@ function cleanUpOldData() {
 
   // 2. Clean sector changes (> 7 days)
   data.gyms.forEach(gym => {
-    if (gym.lastSectorChange && gym.lastSectorChange.timestamp) {
-      if (new Date(gym.lastSectorChange.timestamp) < sevenDaysAgo) {
-        console.log(`✅ Réinitialisation du secteur pour la salle: ${gym.name} (datant du ${gym.lastSectorChange.timestamp})`);
-        gym.lastSectorChange = null;
-        gym.sectorChangedRecently = false;
+    if (gym.sectorChanges && gym.sectorChanges.length > 0) {
+      const initialCount = gym.sectorChanges.length;
+      gym.sectorChanges = gym.sectorChanges.filter(c => new Date(c.timestamp) > sevenDaysAgo);
+
+      if (gym.sectorChanges.length !== initialCount) {
+        console.log(`✅ Nettoyé ${initialCount - gym.sectorChanges.length} changements de secteurs pour la salle: ${gym.name}`);
         changes = true;
       }
+
+      gym.sectorChangedRecently = gym.sectorChanges.length > 0;
+      if (gym.sectorChanges.length > 0) {
+        gym.lastSectorChange = gym.sectorChanges[0];
+      } else {
+        gym.lastSectorChange = null;
+      }
+    } else if (gym.lastSectorChange && new Date(gym.lastSectorChange.timestamp) < sevenDaysAgo) {
+      // Compatibility with old format
+      console.log(`✅ Réinitialisation du secteur (ancien format) pour la salle: ${gym.name}`);
+      gym.lastSectorChange = null;
+      gym.sectorChangedRecently = false;
+      changes = true;
     }
   });
 
@@ -340,13 +354,23 @@ app.post('/api/gyms/:id/sector-change', (req, res) => {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
 
-  gym.sectorChangedRecently = true;
-  gym.lastSectorChange = {
+  const change = {
     sectorName: sectorName || 'Non spécifié',
     description: description || 'Un secteur a été modifié',
     reportedBy: userId,
     timestamp: new Date().toISOString()
   };
+
+  if (!gym.sectorChanges) {
+    gym.sectorChanges = [];
+  }
+
+  // Add to start of array and keep last 10
+  gym.sectorChanges.unshift(change);
+  gym.sectorChanges = gym.sectorChanges.slice(0, 10);
+
+  gym.sectorChangedRecently = true;
+  gym.lastSectorChange = change;
 
   // Create notifications for subscribers
   const subscribers = data.subscriptions.filter(s => s.gymId === req.params.id);

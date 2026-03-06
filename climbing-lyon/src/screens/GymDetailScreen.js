@@ -206,6 +206,20 @@ const GymDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  const getTimeAgo = (timestamp) => {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInMs = now - past;
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInMins < 1) return "à l'instant";
+    if (diffInMins < 60) return `il y a ${diffInMins} min`;
+    if (diffInHours < 24) return `il y a ${diffInHours}h`;
+    return `il y a ${diffInDays}j`;
+  };
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -318,6 +332,23 @@ const GymDetailScreen = ({ route, navigation }) => {
         </View>
 
         <Text style={styles.description}>{gym.description}</Text>
+
+        {gym.sectorChanges && gym.sectorChanges.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🧗 DERNIÈRES MODIFICATIONS (SECTEURS)</Text>
+            <View style={styles.sectorChangesList}>
+              {gym.sectorChanges.map((change, index) => (
+                <View key={index} style={styles.sectorChangeItem}>
+                  <View style={styles.sectorChangeHeader}>
+                    <Text style={styles.sectorChangeName}>{change.sectorName}</Text>
+                    <Text style={styles.sectorChangeTime}>{getTimeAgo(change.timestamp)}</Text>
+                  </View>
+                  <Text style={styles.sectorChangeDescription}>{change.description}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact</Text>
@@ -714,6 +745,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#fff',
     fontWeight: '600',
+  },
+  sectorChangesList: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 12,
+    gap: 12,
+  },
+  sectorChangeItem: {
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#3498db',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  sectorChangeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  sectorChangeName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#2c3e50',
+  },
+  sectorChangeTime: {
+    fontSize: 12,
+    color: '#95a5a6',
+    fontStyle: 'italic',
+  },
+  sectorChangeDescription: {
+    fontSize: 14,
+    color: '#555',
+    lineHeight: 20,
   },
 });
 
