@@ -5,9 +5,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "nodemon server.js"
   },
-  "keywords": ["escalade", "lyon", "climbing", "api"],
+  "keywords": [
+    "escalade",
+    "lyon",
+    "climbing",
+    "api"
+  ],
   "author": "Climbing Lyon",
   "license": "MIT",
   "dependencies": {
@@ -15,5 +20,8 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
