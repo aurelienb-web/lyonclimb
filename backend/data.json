@@ -30,20 +30,26 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 1,
+      "crowdLevel": 3,
       "lastSectorChange": {
-        "sectorName": "Secteur Test Final",
-        "description": "Verification finale",
-        "reportedBy": "4b4f00da-e202-4688-b44f-ed7e4161e283",
-        "timestamp": "2026-03-06T19:10:49.599Z"
+        "sectorName": "dalee",
+        "description": "Un secteur a été modifié",
+        "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
+        "timestamp": "2026-03-15T16:14:26.877Z"
       },
       "sectorChangedRecently": true,
       "sectorChanges": [
         {
-          "sectorName": "Secteur Test Final",
-          "description": "Verification finale",
-          "reportedBy": "4b4f00da-e202-4688-b44f-ed7e4161e283",
-          "timestamp": "2026-03-06T19:10:49.599Z"
+          "sectorName": "dalee",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
+          "timestamp": "2026-03-15T16:14:26.877Z"
+        },
+        {
+          "sectorName": "devers",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
+          "timestamp": "2026-03-15T16:13:31.326Z"
         }
       ]
     },
@@ -78,8 +84,21 @@
       ],
       "image": "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=400",
       "crowdLevel": 2,
-      "lastSectorChange": null,
-      "sectorChangedRecently": false
+      "lastSectorChange": {
+        "sectorName": "dalle",
+        "description": "Un secteur a été modifié",
+        "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
+        "timestamp": "2026-03-15T16:13:16.306Z"
+      },
+      "sectorChangedRecently": true,
+      "sectorChanges": [
+        {
+          "sectorName": "dalle",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
+          "timestamp": "2026-03-15T16:13:16.306Z"
+        }
+      ]
     },
     {
       "id": "3",
@@ -266,7 +285,7 @@
       "type": "sector_change",
       "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
       "message": "Un secteur a été modifié : Secteur Test. Ceci est une description de test",
-      "read": false,
+      "read": true,
       "createdAt": "2026-03-06T19:00:28.681Z"
     },
     {
@@ -277,7 +296,7 @@
       "type": "sector_change",
       "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
       "message": "Un secteur a été modifié : Secteur Test 2. Deuxi�me test",
-      "read": false,
+      "read": true,
       "createdAt": "2026-03-06T19:04:05.994Z"
     },
     {
@@ -288,7 +307,7 @@
       "type": "sector_change",
       "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
       "message": "Un secteur a été modifié : Secteur Test 3. Troisi�me test",
-      "read": false,
+      "read": true,
       "createdAt": "2026-03-06T19:09:00.344Z"
     },
     {
@@ -299,9 +318,38 @@
       "type": "sector_change",
       "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
       "message": "Un secteur a été modifié : Secteur Test Final. Verification finale",
-      "read": false,
+      "read": true,
       "createdAt": "2026-03-06T19:10:49.600Z"
     }
   ],
-  "crowdUpdates": []
+  "crowdUpdates": [
+    {
+      "id": "6450049e-ce75-4743-997a-1cc2afaba947",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 1,
+      "timestamp": "2026-03-15T16:12:15.711Z"
+    },
+    {
+      "id": "9bc504f2-fa2f-4710-87c0-a28d97d58691",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 5,
+      "timestamp": "2026-03-15T16:12:18.676Z"
+    },
+    {
+      "id": "8442d738-8501-4880-a0e1-aa923a68e097",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 1,
+      "timestamp": "2026-03-15T16:12:20.341Z"
+    },
+    {
+      "id": "d67f714b-f0e8-4ec5-8243-af6ca498d584",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 5,
+      "timestamp": "2026-03-15T16:12:43.864Z"
+    }
+  ]
 }
