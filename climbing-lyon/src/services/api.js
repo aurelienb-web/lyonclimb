@@ -36,6 +36,12 @@ export const register = async (email, name) => {
   return response.data;
 };
 
+export const registerPushToken = async (userId, token) => {
+  const response = await api.post(`/users/${userId}/push-token`, { token });
+  return response.data;
+};
+
+
 // Subscriptions
 export const subscribe = async (userId, gymId, pushToken = null) => {
   const response = await api.post('/subscriptions', { userId, gymId, pushToken });

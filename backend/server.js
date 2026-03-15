@@ -4,6 +4,10 @@ const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
+const { Expo } = require('expo-server-sdk');
+
+// Initialize Expo SDK client for sending push notifications
+const expo = new Expo();
 
 const app = express();
 const PORT = process.env.PORT || 12000;
@@ -76,8 +80,28 @@ function cleanUpOldData() {
   }
 }
 
-// Store push tokens for notifications
-const pushTokens = new Map();
+// POST register/update push token for a user
+app.post('/api/users/:userId/push-token', (req, res) => {
+  const { userId } = req.params;
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ error: 'token requis' });
+  }
+
+  const data = readData();
+  const user = data.users.find(u => u.id === userId);
+
+  if (!user) {
+    return res.status(404).json({ error: 'Utilisateur non trouvé' });
+  }
+
+  user.pushToken = token;
+  writeData(data);
+
+  console.log(`📱 Token push enregistré pour ${user.email}: ${token}`);
+  res.json({ message: 'Token enregistré', token });
+});
 
 // GET all gyms
 app.get('/api/gyms', (req, res) => {
@@ -374,25 +398,59 @@ app.post('/api/gyms/:id/sector-change', (req, res) => {
 
   // Create notifications for subscribers
   const subscribers = data.subscriptions.filter(s => s.gymId === req.params.id);
+  const notifTitle = `🧗 Nouveauté chez ${gym.name}`;
+  const notifMessage = `Un secteur a été modifié${sectorName ? ` : ${sectorName}` : ''}.${description ? ` ${description}` : ''}`;
+
+  const pushMessages = [];
 
   subscribers.forEach(sub => {
     if (sub.userId !== userId) {
+      // In-app notification
       const notification = {
         id: uuidv4(),
         userId: sub.userId,
         gymId: req.params.id,
         gymName: gym.name,
         type: 'sector_change',
-        title: `🧗 Nouveauté chez ${gym.name}`,
-        message: `Un secteur a été modifié${sectorName ? ` : ${sectorName}` : ''}.${description ? ` ${description}` : ''}`,
+        title: notifTitle,
+        message: notifMessage,
         read: false,
         createdAt: new Date().toISOString()
       };
       data.notifications.push(notification);
+
+      // Prepare Expo push notification
+      const subscribedUser = data.users.find(u => u.id === sub.userId);
+      const pushToken = subscribedUser?.pushToken;
+
+      if (pushToken && Expo.isExpoPushToken(pushToken)) {
+        pushMessages.push({
+          to: pushToken,
+          sound: 'default',
+          title: notifTitle,
+          body: notifMessage,
+          data: { gymId: req.params.id, gymName: gym.name, type: 'sector_change' },
+        });
+      }
     }
   });
 
   writeData(data);
+
+  // Send push notifications in chunks (Expo recommends batching)
+  if (pushMessages.length > 0) {
+    const chunks = expo.chunkPushNotifications(pushMessages);
+    (async () => {
+      for (const chunk of chunks) {
+        try {
+          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+          console.log(`📨 Push envoyés:`, ticketChunk);
+        } catch (error) {
+          console.error('❌ Erreur envoi push:', error);
+        }
+      }
+    })();
+  }
 
   res.json({
     gym,

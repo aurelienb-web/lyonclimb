@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -11,6 +11,7 @@ import GymDetailScreen from './src/screens/GymDetailScreen';
 import SubscriptionsScreen from './src/screens/SubscriptionsScreen';
 import NotificationsScreen from './src/screens/NotificationsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import { setupNotificationListener } from './src/services/notificationService';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -84,12 +85,27 @@ const MainTabs = () => (
 );
 
 export default function App() {
+  const navigationRef = useRef(null);
+
+  useEffect(() => {
+    // Setup listener for when user taps a push notification
+    const cleanup = setupNotificationListener({
+      navigate: (screen, params) => {
+        if (navigationRef.current) {
+          navigationRef.current.navigate(screen, params);
+        }
+      }
+    });
+    return cleanup;
+  }, []);
+
   return (
     <AuthProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <StatusBar style="dark" />
         <MainTabs />
       </NavigationContainer>
     </AuthProvider>
   );
 }
+

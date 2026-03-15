@@ -35,7 +35,7 @@ const CROWD_LEVELS = [
 
 const GymDetailScreen = ({ route, navigation }) => {
   const { gymId } = route.params;
-  const { user } = useAuth();
+  const { user, pushToken } = useAuth();
 
   const [gym, setGym] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -111,7 +111,7 @@ const GymDetailScreen = ({ route, navigation }) => {
         setIsSubscribed(false);
         Alert.alert('✓', 'Vous ne suivez plus cette salle');
       } else {
-        await subscribe(user.id, gymId);
+        await subscribe(user.id, gymId, pushToken);
         setIsSubscribed(true);
         Alert.alert('✓', 'Vous suivez maintenant cette salle !');
       }

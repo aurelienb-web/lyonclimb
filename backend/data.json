@@ -32,13 +32,37 @@
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
       "crowdLevel": 1,
       "lastSectorChange": {
-        "sectorName": "test",
+        "sectorName": "test 4 notif",
         "description": "Un secteur a été modifié",
         "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
-        "timestamp": "2026-03-15T21:27:51.490Z"
+        "timestamp": "2026-03-15T22:00:51.450Z"
       },
       "sectorChangedRecently": true,
       "sectorChanges": [
+        {
+          "sectorName": "test 4 notif",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+          "timestamp": "2026-03-15T22:00:51.450Z"
+        },
+        {
+          "sectorName": "test 3 notif",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+          "timestamp": "2026-03-15T21:47:27.799Z"
+        },
+        {
+          "sectorName": "test notif2",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+          "timestamp": "2026-03-15T21:44:27.734Z"
+        },
+        {
+          "sectorName": "test notif",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+          "timestamp": "2026-03-15T21:43:32.871Z"
+        },
         {
           "sectorName": "test",
           "description": "Un secteur a été modifié",
@@ -344,6 +368,50 @@
       "message": "Un secteur a été modifié : test.",
       "read": true,
       "createdAt": "2026-03-15T21:27:51.490Z"
+    },
+    {
+      "id": "7059f95b-f3c4-42ec-966a-b5e3b959c748",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : test notif.",
+      "read": true,
+      "createdAt": "2026-03-15T21:43:32.871Z"
+    },
+    {
+      "id": "b03bbf2c-9cb6-4c93-bf9f-0c4116884eda",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : test notif2.",
+      "read": true,
+      "createdAt": "2026-03-15T21:44:27.734Z"
+    },
+    {
+      "id": "9608fc24-113a-499a-a9f8-4deeb53a287e",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : test 3 notif.",
+      "read": true,
+      "createdAt": "2026-03-15T21:47:27.799Z"
+    },
+    {
+      "id": "736fa522-ccd5-45bd-8481-a6f7d03bc159",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : test 4 notif.",
+      "read": true,
+      "createdAt": "2026-03-15T22:00:51.450Z"
     }
   ],
   "crowdUpdates": [

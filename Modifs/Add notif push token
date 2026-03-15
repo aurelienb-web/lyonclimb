@@ -1,0 +1,51 @@
+# Push Notifications — Walkthrough
+
+## Ce qui a été fait
+
+### Backend (`backend/`)
+| Fichier | Changement |
+|---|---|
+| `server.js` | Import + init `expo-server-sdk`, nouvelle route `POST /api/users/:userId/push-token`, envoi push dans `POST /api/gyms/:id/sector-change` |
+| `package.json` | Ajout de `expo-server-sdk` |
+
+### App Expo (`climbing-lyon/`)
+| Fichier | Changement |
+|---|---|
+| `src/services/notificationService.js` | **Nouveau** — Permissions, obtention du token Expo, listener de tap |
+| `src/services/api.js` | Ajout de `registerPushToken()` |
+| `src/context/AuthContext.js` | Au login : demande les permissions push et enregistre le token au backend |
+| `src/screens/GymDetailScreen.js` | Passe le `pushToken` lors de l'abonnement à une salle |
+| `App.js` | Listener de tap sur notification → navigation vers la salle concernée |
+| `app.json` | Plugin `expo-notifications` avec couleur et icône |
+
+## Flux complet
+
+```
+1. Utilisateur B se connecte
+   └─> Expo demande les permissions push
+   └─> Token ExponentPushToken[xxx] obtenu → POST /api/users/:id/push-token
+   └─> Token stocké dans data.json (champ pushToken sur l'objet user)
+
+2. Utilisateur B s'abonne à une salle
+   └─> POST /api/subscriptions (avec pushToken)
+
+3. Utilisateur A signale un changement de secteur
+   └─> POST /api/gyms/:id/sector-change
+   └─> Notification in-app créée dans data.json
+   └─> Expo Push API contactée → 🔔 push sur le téléphone de B
+   
+4. Utilisateur B tape sur la notification
+   └─> App s'ouvre et navigue directement vers la page de la salle
+```
+
+## Pour tester
+
+> ⚠️ Les push nécessitent un **vrai appareil physique** (pas d'émulateur).
+
+1. **Redémarrer** le serveur backend si `nodemon` n'a pas détecté les changements
+2. **Relancer** Expo (`npx expo start --clear` pour vider le cache)
+3. Sur le **téléphone de l'utilisateur B** : se connecter → accepter les permissions push → s'abonner à une salle
+4. Vérifier dans les logs backend : `📱 Token push enregistré pour ...`
+5. Sur le **téléphone de l'utilisateur A** (ou le même) : signaler un changement de secteur
+6. Le téléphone de B reçoit 🔔 la notification push système
+7. Tapoter dessus → l'app ouvre directement la page de la salle
