@@ -30,15 +30,21 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 3,
+      "crowdLevel": 1,
       "lastSectorChange": {
-        "sectorName": "dalee",
+        "sectorName": "test",
         "description": "Un secteur a été modifié",
-        "reportedBy": "a00dc823-8562-4131-9701-9a8d67b182d8",
-        "timestamp": "2026-03-15T16:14:26.877Z"
+        "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+        "timestamp": "2026-03-15T21:27:51.490Z"
       },
       "sectorChangedRecently": true,
       "sectorChanges": [
+        {
+          "sectorName": "test",
+          "description": "Un secteur a été modifié",
+          "reportedBy": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+          "timestamp": "2026-03-15T21:27:51.490Z"
+        },
         {
           "sectorName": "dalee",
           "description": "Un secteur a été modifié",
@@ -274,6 +280,13 @@
       "gymId": "1",
       "pushToken": null,
       "createdAt": "2026-02-26T21:05:01.836Z"
+    },
+    {
+      "id": "942fc5f9-2f98-4218-b9e5-8d1b66fea82c",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "gymId": "2",
+      "pushToken": null,
+      "createdAt": "2026-03-15T21:23:10.188Z"
     }
   ],
   "notifications": [
@@ -320,6 +333,17 @@
       "message": "Un secteur a été modifié : Secteur Test Final. Verification finale",
       "read": true,
       "createdAt": "2026-03-06T19:10:49.600Z"
+    },
+    {
+      "id": "8d267e45-8bf8-448e-a3f2-326d8ba02e22",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "gymName": "Climb Up Lyon Confluence",
+      "type": "sector_change",
+      "title": "🧗 Nouveauté chez Climb Up Lyon Confluence",
+      "message": "Un secteur a été modifié : test.",
+      "read": true,
+      "createdAt": "2026-03-15T21:27:51.490Z"
     }
   ],
   "crowdUpdates": [
@@ -350,6 +374,13 @@
       "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
       "crowdLevel": 5,
       "timestamp": "2026-03-15T16:12:43.864Z"
+    },
+    {
+      "id": "2fd33472-f06a-4e7d-a09b-9670b7f915a2",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-03-15T21:28:10.987Z"
     }
   ]
 }

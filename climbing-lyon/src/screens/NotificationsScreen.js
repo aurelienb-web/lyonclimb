@@ -60,7 +60,7 @@ const NotificationsScreen = ({ navigation }) => {
       }
     }
     
-    navigation.navigate('Home', {
+    navigation.navigate('Salles', {
       screen: 'GymDetail',
       params: { gymId: notification.gymId, gymName: notification.gymName },
     });

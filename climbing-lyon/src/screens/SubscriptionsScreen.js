@@ -62,7 +62,7 @@ const SubscriptionsScreen = ({ navigation }) => {
   };
 
   const handleGymPress = (gym) => {
-    navigation.navigate('Home', {
+    navigation.navigate('Salles', {
       screen: 'GymDetail',
       params: { gymId: gym.id, gymName: gym.name },
     });
