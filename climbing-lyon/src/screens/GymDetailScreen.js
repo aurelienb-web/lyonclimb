@@ -333,11 +333,11 @@ const GymDetailScreen = ({ route, navigation }) => {
 
         <Text style={styles.description}>{gym.description}</Text>
 
-        {gym.sectorChanges && gym.sectorChanges.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🧗 DERNIÈRES MODIFICATIONS (SECTEURS)</Text>
-            <View style={styles.sectorChangesList}>
-              {gym.sectorChanges.map((change, index) => (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🧗 DERNIÈRES MODIFICATIONS (SECTEURS)</Text>
+          <View style={styles.sectorChangesList}>
+            {gym.sectorChanges && gym.sectorChanges.length > 0 ? (
+              gym.sectorChanges.map((change, index) => (
                 <View key={index} style={styles.sectorChangeItem}>
                   <View style={styles.sectorChangeHeader}>
                     <Text style={styles.sectorChangeName}>{change.sectorName}</Text>
@@ -345,10 +345,14 @@ const GymDetailScreen = ({ route, navigation }) => {
                   </View>
                   <Text style={styles.sectorChangeDescription}>{change.description}</Text>
                 </View>
-              ))}
-            </View>
+              ))
+            ) : (
+              <Text style={styles.noSectorChangesText}>
+                Aucune modification de secteur signalée depuis 7 jours
+              </Text>
+            )}
           </View>
-        )}
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact</Text>
@@ -784,6 +788,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     lineHeight: 20,
+  },
+  noSectorChangesText: {
+    fontSize: 14,
+    color: '#7f8c8d',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 8,
   },
 });
 
