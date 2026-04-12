@@ -29,18 +29,7 @@ const SubscriptionsScreen = ({ navigation }) => {
     try {
       const data = await getUserSubscriptions(user.id);
 
-      // Synchroniser l'état de masquage des alertes de secteur
-      const updatedSubscriptions = await Promise.all(data.map(async (gym) => {
-        if (gym.sectorChangedRecently && gym.lastSectorChange) {
-          const dismissedTimestamp = await AsyncStorage.getItem(`dismissed_alert_${gym.id}`);
-          if (dismissedTimestamp === gym.lastSectorChange.timestamp) {
-            return { ...gym, sectorChangedRecently: false };
-          }
-        }
-        return gym;
-      }));
-
-      setSubscriptions(updatedSubscriptions);
+      setSubscriptions(data);
     } catch (error) {
       console.error('Erreur chargement abonnements:', error);
     } finally {
@@ -104,7 +93,7 @@ const SubscriptionsScreen = ({ navigation }) => {
           <Text style={styles.emptyIcon}>🧗</Text>
           <Text style={styles.emptyTitle}>Aucune salle suivie</Text>
           <Text style={styles.emptyText}>
-            Abonnez-vous à vos salles préférées pour recevoir les notifications de changements de secteur
+            Abonnez-vous à vos salles préférées pour les retrouver facilement
           </Text>
         </View>
       ) : (

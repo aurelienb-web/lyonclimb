@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // const API_BASE_URL = 'https://work-1-qvlwqbjsnisnedpv.prod-runtime.all-hands.dev/api';
-const API_BASE_URL = 'http://192.168.1.11:12000/api';
+const API_BASE_URL = 'http://192.168.1.20:12000/api';
+//const API_BASE_URL = 'http://192.168.1.11:12000/api';
 
 
 const api = axios.create({
@@ -64,15 +65,6 @@ export const updateCrowdLevel = async (gymId, userId, crowdLevel) => {
   return response.data;
 };
 
-// Sector changes
-export const reportSectorChange = async (gymId, userId, sectorName, description) => {
-  const response = await api.post(`/gyms/${gymId}/sector-change`, {
-    userId,
-    sectorName,
-    description,
-  });
-  return response.data;
-};
 
 // Notifications
 export const getNotifications = async (userId) => {

@@ -19,11 +19,6 @@ const GymCard = ({ gym, onPress }) => {
         style={styles.image}
         defaultSource={require('../../assets/placeholder.png')}
       />
-      {gym.sectorChangedRecently && (
-        <View style={styles.newBadge}>
-          <Text style={styles.newBadgeText}>🆕 Nouveau secteur</Text>
-        </View>
-      )}
       <View style={styles.content}>
         <Text style={styles.name}>{gym.name}</Text>
         <Text style={styles.address} numberOfLines={1}>{gym.address}</Text>
@@ -71,20 +66,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 160,
     backgroundColor: '#f0f0f0',
-  },
-  newBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: '#e74c3c',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  newBadgeText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
   },
   content: {
     padding: 16,

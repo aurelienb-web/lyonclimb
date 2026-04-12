@@ -24,7 +24,6 @@
     .gym-card { background: #fff; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
     .gym-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
     .gym-card img { width: 100%; height: 160px; object-fit: cover; background: #f0f0f0; }
-    .gym-card .new-badge { position: absolute; top: 12px; right: 12px; background: #e74c3c; color: #fff; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
     .gym-card .content { padding: 16px; }
     .gym-card .name { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
     .gym-card .address { font-size: 14px; color: #7f8c8d; margin-bottom: 12px; }
@@ -37,9 +36,6 @@
     .features { display: flex; flex-wrap: wrap; gap: 8px; }
     .feature-tag { background: #ecf0f1; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #7f8c8d; }
     .detail-image { width: 100%; height: 250px; object-fit: cover; background: #f0f0f0; }
-    .alert-banner { background: #e74c3c; color: #fff; padding: 12px; text-align: center; }
-    .alert-banner .title { font-weight: 700; font-size: 14px; }
-    .alert-banner .detail { font-size: 12px; opacity: 0.9; margin-top: 4px; }
     .detail-content { padding: 20px; }
     .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
     .detail-title { flex: 1; margin-right: 12px; }
@@ -75,9 +71,6 @@
     .level-btn.selected { color: #fff; }
     .level-btn .emoji { font-size: 28px; margin-bottom: 4px; }
     .level-btn .text { font-size: 11px; text-align: center; color: inherit; }
-    .report-btn { background: #3498db; color: #fff; border: none; padding: 16px; border-radius: 12px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; transition: background 0.2s; }
-    .report-btn:hover { background: #2980b9; }
-    .report-btn:disabled { background: #bdc3c7; cursor: not-allowed; }
     .login-hint { text-align: center; color: #95a5a6; margin-top: 12px; font-size: 13px; }
     .back-btn { display: flex; align-items: center; padding: 12px 20px; background: #fff; border-bottom: 1px solid #ecf0f1; cursor: pointer; position: sticky; top: 0; z-index: 100; }
     .back-btn span { color: #3498db; font-weight: 600; }
@@ -112,16 +105,6 @@
     .empty-state .icon { font-size: 80px; margin-bottom: 20px; }
     .empty-state .title { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 8px; }
     .empty-state .text { font-size: 15px; color: #7f8c8d; line-height: 22px; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-    .modal-overlay.active { display: flex; }
-    .modal-content { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; }
-    .modal-title { font-size: 20px; font-weight: 700; color: #2c3e50; text-align: center; margin-bottom: 20px; }
-    .modal-input { width: 100%; padding: 14px; border: 1px solid #ecf0f1; border-radius: 12px; font-size: 16px; margin-bottom: 12px; background: #f8f9fa; }
-    .modal-textarea { height: 100px; resize: none; }
-    .modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
-    .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; border: none; }
-    .modal-btn.cancel { background: #ecf0f1; color: #7f8c8d; }
-    .modal-btn.submit { background: #3498db; color: #fff; }
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 600; z-index: 2000; display: none; }
     .toast.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
@@ -150,7 +133,6 @@
       <button class="tab-item" onclick="showTab('profile')"><span class="icon">👤</span><span class="label">Profil</span></button>
     </nav>
   </div>
-  <div id="sectorModal" class="modal-overlay"><div class="modal-content"><h3 class="modal-title">Signaler un changement</h3><input type="text" id="sectorName" class="modal-input" placeholder="Nom du secteur (optionnel)"><textarea id="sectorDesc" class="modal-input modal-textarea" placeholder="Description du changement"></textarea><div class="modal-buttons"><button class="modal-btn cancel" onclick="closeSectorModal()">Annuler</button><button class="modal-btn submit" onclick="submitSectorChange()">Envoyer</button></div></div></div>
   <div id="toast" class="toast"></div>
 
   <script>
@@ -196,7 +178,6 @@
         const c = CROWD_LEVELS.find(x => x.level === gym.crowdLevel) || CROWD_LEVELS[2];
         return `<div class="gym-card" onclick="showDetail('${gym.id}')">
           <img src="${gym.image}" onerror="this.src='https://via.placeholder.com/400x160?text=🧗'">
-          ${gym.sectorChangedRecently ? '<div class="new-badge">🆕 Nouveau secteur</div>' : ''}
           <div class="content"><div class="name">${gym.name}</div><div class="address">${gym.address}</div>
           <div class="footer"><div class="price-container"><div class="price-label">Entrée</div><div class="price">${gym.pricing.singleEntry}</div></div>
           <div class="crowd-badge" style="background:${c.color}20;color:${c.color}"><span>${c.emoji}</span> ${c.label}</div></div>
@@ -226,7 +207,6 @@
       const g = currentGym, c = CROWD_LEVELS.find(x => x.level === g.crowdLevel) || CROWD_LEVELS[2], sub = isSubscribed(g.id);
       document.getElementById('gymDetail').innerHTML = `
         <img src="${g.image}" class="detail-image" onerror="this.src='https://via.placeholder.com/400x250?text=🧗'">
-        ${g.sectorChangedRecently ? `<div class="alert-banner"><div class="title">🆕 Un secteur a été récemment modifié !</div>${g.lastSectorChange?`<div class="detail">${g.lastSectorChange.sectorName}: ${g.lastSectorChange.description}</div>`:''}</div>` : ''}
         <div class="detail-content">
           <div class="detail-header"><div class="detail-title"><h2>${g.name}</h2><div class="address" onclick="openMaps('${g.address}')">📍 ${g.address}</div></div>
           <button class="subscribe-btn ${sub?'subscribed':''}" onclick="toggleSub('${g.id}')">${sub?'✓ Abonné':'+ Suivre'}</button></div>
@@ -245,7 +225,6 @@
           <div class="contribution-section"><h3 class="contribution-title">🤝 Contribuez</h3>
             <div class="crowd-selector"><div class="title">Quelle est l'affluence actuelle ?</div>
             <div class="levels-container">${CROWD_LEVELS.map(x=>`<button class="level-btn ${g.crowdLevel===x.level?'selected':''}" style="${g.crowdLevel===x.level?`background:${x.color};border-color:${x.color};color:white;`:''}" onclick="updateCrowd(${x.level})" ${!user?'disabled':''}><span class="emoji">${x.faceEmoji}</span><span class="text">${x.label}</span></button>`).join('')}</div></div>
-            <button class="report-btn" onclick="openSectorModal()" ${!user?'disabled':''}>🔄 Signaler un changement de secteur</button>
             ${!user?'<p class="login-hint">Connectez-vous pour contribuer</p>':''}
           </div>
         </div>`;
@@ -279,20 +258,6 @@
       } catch (err) { showToast('Erreur'); }
     }
     
-    function openSectorModal() { if (!user) { showToast('Connectez-vous'); showTab('profile'); return; } document.getElementById('sectorModal').classList.add('active'); }
-    function closeSectorModal() { document.getElementById('sectorModal').classList.remove('active'); document.getElementById('sectorName').value = ''; document.getElementById('sectorDesc').value = ''; }
-    
-    async function submitSectorChange() {
-      const name = document.getElementById('sectorName').value, desc = document.getElementById('sectorDesc').value;
-      try {
-        const res = await fetch(`${API_URL}/gyms/${currentGym.id}/sector-change`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, sectorName: name, description: desc }) });
-        const data = await res.json();
-        currentGym = data.gym;
-        closeSectorModal();
-        renderDetail();
-        showToast(`Changement signalé. ${data.notifiedUsers} abonné(s) notifié(s)`);
-      } catch (err) { showToast('Erreur'); }
-    }
     
     async function loadSubscriptions() {
       if (!user) { subscriptions = []; renderSubscriptions(); return; }
@@ -304,7 +269,7 @@
       if (!user) { cnt.textContent = ''; lst.innerHTML = '<div class="empty-state"><div class="icon">🔒</div><div class="title">Connexion requise</div><div class="text">Connectez-vous pour voir vos salles suivies</div></div>'; return; }
       cnt.textContent = `${subscriptions.length} salle${subscriptions.length!==1?'s':''} suivie${subscriptions.length!==1?'s':''}`;
       if (subscriptions.length === 0) { lst.innerHTML = '<div class="empty-state"><div class="icon">🧗</div><div class="title">Aucune salle suivie</div><div class="text">Abonnez-vous à vos salles préférées</div></div>'; }
-      else { lst.innerHTML = `<div class="gym-list">${subscriptions.map(g => { const c = CROWD_LEVELS.find(x=>x.level===g.crowdLevel)||CROWD_LEVELS[2]; return `<div class="gym-card" onclick="showDetail('${g.id}')"><img src="${g.image}" onerror="this.src='https://via.placeholder.com/400x160?text=🧗'">${g.sectorChangedRecently?'<div class="new-badge">🆕 Nouveau secteur</div>':''}<div class="content"><div class="name">${g.name}</div><div class="address">${g.address}</div><div class="footer"><div class="price-container"><div class="price-label">Entrée</div><div class="price">${g.pricing.singleEntry}</div></div><div class="crowd-badge" style="background:${c.color}20;color:${c.color}"><span>${c.emoji}</span> ${c.label}</div></div></div></div>`; }).join('')}</div>`; }
+      else { lst.innerHTML = `<div class="gym-list">${subscriptions.map(g => { const c = CROWD_LEVELS.find(x=>x.level===g.crowdLevel)||CROWD_LEVELS[2]; return `<div class="gym-card" onclick="showDetail('${g.id}')"><img src="${g.image}" onerror="this.src='https://via.placeholder.com/400x160?text=🧗'"><div class="content"><div class="name">${g.name}</div><div class="address">${g.address}</div><div class="footer"><div class="price-container"><div class="price-label">Entrée</div><div class="price">${g.pricing.singleEntry}</div></div><div class="crowd-badge" style="background:${c.color}20;color:${c.color}"><span>${c.emoji}</span> ${c.label}</div></div></div></div>`; }).join('')}</div>`; }
     }
     
     async function loadNotifications() {
@@ -338,7 +303,7 @@
         el.innerHTML = `<div class="login-container"><div class="login-icon">🧗</div><h2 class="login-title">Bienvenue !</h2><p class="login-subtitle">Connectez-vous pour suivre vos salles préférées et contribuer à la communauté</p>
         <div class="form-group"><label>Adresse email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
         <button class="login-btn" onclick="login()">Se connecter</button>
-        <div class="feature-list"><div class="feature-item"><span class="icon">📍</span><span class="text">Découvrez les salles d'escalade de Lyon</span></div><div class="feature-item"><span class="icon">🔔</span><span class="text">Recevez les notifications de nouveaux secteurs</span></div><div class="feature-item"><span class="icon">📊</span><span class="text">Partagez l'affluence en temps réel</span></div></div></div>`;
+        <div class="feature-list"><div class="feature-item"><span class="icon">📍</span><span class="text">Découvrez les salles d'escalade de Lyon</span></div><div class="feature-item"><span class="icon">📊</span><span class="text">Partagez l'affluence en temps réel</span></div></div></div>`;
       }
     }
     

@@ -25,18 +25,7 @@ const HomeScreen = ({ navigation }) => {
       setError(null);
       const data = await getGyms();
 
-      // Synchroniser l'état de masquage des alertes de secteur
-      const updatedGyms = await Promise.all(data.map(async (gym) => {
-        if (gym.sectorChangedRecently && gym.lastSectorChange) {
-          const dismissedTimestamp = await AsyncStorage.getItem(`dismissed_alert_${gym.id}`);
-          if (dismissedTimestamp === gym.lastSectorChange.timestamp) {
-            return { ...gym, sectorChangedRecently: false };
-          }
-        }
-        return gym;
-      }));
-
-      setGyms(updatedGyms);
+      setGyms(data);
     } catch (err) {
       console.error('Erreur chargement salles:', err);
       setError('Impossible de charger les salles. Vérifiez votre connexion.');

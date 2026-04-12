@@ -156,7 +156,7 @@ const NotificationsScreen = ({ navigation }) => {
           <Text style={styles.emptyIcon}>🔕</Text>
           <Text style={styles.emptyTitle}>Aucune notification</Text>
           <Text style={styles.emptyText}>
-            Suivez des salles pour recevoir des notifications lors des changements de secteur
+            Suivez des salles pour recevoir des actualités
           </Text>
         </View>
       ) : (

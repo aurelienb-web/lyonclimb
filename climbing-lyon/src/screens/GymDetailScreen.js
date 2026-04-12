@@ -22,7 +22,6 @@ import {
   unsubscribe,
   getUserSubscriptions,
   updateCrowdLevel,
-  reportSectorChange,
 } from '../services/api';
 
 const CROWD_LEVELS = [
@@ -42,26 +41,12 @@ const GymDetailScreen = ({ route, navigation }) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [selectedCrowd, setSelectedCrowd] = useState(null);
   const [updating, setUpdating] = useState(false);
-  const [sectorModalVisible, setSectorModalVisible] = useState(false);
-  const [sectorName, setSectorName] = useState('');
-  const [sectorDescription, setSectorDescription] = useState('');
-  const [showSectorAlert, setShowSectorAlert] = useState(true);
 
   const loadGym = async () => {
     try {
       const data = await getGym(gymId, user?.id);
       setGym(data);
       setSelectedCrowd(data.userLastContribution);
-
-      // Vérifier si l'utilisateur a déjà masqué cette notification pour cette version
-      if (data.sectorChangedRecently && data.lastSectorChange) {
-        const dismissedTimestamp = await AsyncStorage.getItem(`dismissed_alert_${gymId}`);
-        if (dismissedTimestamp === data.lastSectorChange.timestamp) {
-          setShowSectorAlert(false);
-        } else {
-          setShowSectorAlert(true);
-        }
-      }
     } catch (error) {
       console.error('Erreur chargement salle:', error);
       Alert.alert('Erreur', 'Impossible de charger les détails de la salle');
@@ -152,40 +137,6 @@ const GymDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleReportSectorChange = async () => {
-    if (!user) {
-      Alert.alert(
-        'Connexion requise',
-        'Connectez-vous pour signaler un changement.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Se connecter', onPress: () => navigation.navigate('Profile') },
-        ]
-      );
-      return;
-    }
-
-    setSectorModalVisible(true);
-  };
-
-  const submitSectorChange = async () => {
-    try {
-      setUpdating(true);
-      const result = await reportSectorChange(gymId, user.id, sectorName, sectorDescription);
-      setSectorModalVisible(false);
-      setSectorName('');
-      setSectorDescription('');
-      setGym(result.gym);
-      Alert.alert(
-        '✓ Merci !',
-        `Changement signalé. ${result.notifiedUsers} abonné(s) notifié(s).`
-      );
-    } catch (error) {
-      Alert.alert('Erreur', 'Impossible de signaler le changement');
-    } finally {
-      setUpdating(false);
-    }
-  };
 
   const openWebsite = () => {
     if (gym?.website) {
@@ -242,29 +193,6 @@ const GymDetailScreen = ({ route, navigation }) => {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={{ uri: gym.image }} style={styles.image} />
 
-      {gym.sectorChangedRecently && showSectorAlert && (
-        <View style={styles.alertBanner}>
-          <View style={styles.alertContent}>
-            <Text style={styles.alertText}>🆕 Un secteur a été récemment modifié !</Text>
-            {gym.lastSectorChange && (
-              <Text style={styles.alertDetail}>
-                {gym.lastSectorChange.sectorName}: {gym.lastSectorChange.description}
-              </Text>
-            )}
-          </View>
-          <TouchableOpacity
-            style={styles.closeAlertButton}
-            onPress={async () => {
-              setShowSectorAlert(false);
-              if (gym?.lastSectorChange?.timestamp) {
-                await AsyncStorage.setItem(`dismissed_alert_${gymId}`, gym.lastSectorChange.timestamp);
-              }
-            }}
-          >
-            <Text style={styles.closeAlertText}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
       <View style={styles.content}>
         <View style={styles.headerRow}>
@@ -304,15 +232,6 @@ const GymDetailScreen = ({ route, navigation }) => {
             ) : null;
           })()}
 
-          <TouchableOpacity
-            style={styles.reportButton}
-            onPress={handleReportSectorChange}
-            disabled={updating}
-          >
-            <Text style={styles.reportButtonText}>
-              🔄 Signaler un changement de secteur
-            </Text>
-          </TouchableOpacity>
 
           {!user && (
             <Text style={styles.loginHint}>
@@ -333,26 +252,6 @@ const GymDetailScreen = ({ route, navigation }) => {
 
         <Text style={styles.description}>{gym.description}</Text>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🧗 DERNIÈRES MODIFICATIONS (SECTEURS)</Text>
-          <View style={styles.sectorChangesList}>
-            {gym.sectorChanges && gym.sectorChanges.length > 0 ? (
-              gym.sectorChanges.map((change, index) => (
-                <View key={index} style={styles.sectorChangeItem}>
-                  <View style={styles.sectorChangeHeader}>
-                    <Text style={styles.sectorChangeName}>{change.sectorName}</Text>
-                    <Text style={styles.sectorChangeTime}>{getTimeAgo(change.timestamp)}</Text>
-                  </View>
-                  <Text style={styles.sectorChangeDescription}>{change.description}</Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.noSectorChangesText}>
-                Aucune modification de secteur signalée depuis 7 jours
-              </Text>
-            )}
-          </View>
-        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact</Text>
@@ -414,53 +313,6 @@ const GymDetailScreen = ({ route, navigation }) => {
         </View>
       </View>
 
-      <Modal
-        visible={sectorModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSectorModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Signaler un changement</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom du secteur (optionnel)"
-              value={sectorName}
-              onChangeText={setSectorName}
-            />
-
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Description du changement"
-              value={sectorDescription}
-              onChangeText={setSectorDescription}
-              multiline
-              numberOfLines={3}
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setSectorModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.modalSubmitButton}
-                onPress={submitSectorChange}
-                disabled={updating}
-              >
-                <Text style={styles.modalSubmitText}>
-                  {updating ? 'Envoi...' : 'Envoyer'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -479,38 +331,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 250,
     backgroundColor: '#f0f0f0',
-  },
-  alertBanner: {
-    backgroundColor: '#e74c3c',
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  alertContent: {
-    flex: 1,
-  },
-  alertText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  alertDetail: {
-    color: '#fff',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 4,
-    opacity: 0.9,
-  },
-  closeAlertButton: {
-    padding: 4,
-    marginLeft: 8,
-  },
-  closeAlertText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
   },
   content: {
     padding: 20,
@@ -689,112 +509,6 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: '#e74c3c',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2c3e50',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#ecf0f1',
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  modalCancelButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: '#ecf0f1',
-    marginRight: 8,
-  },
-  modalCancelText: {
-    textAlign: 'center',
-    color: '#7f8c8d',
-    fontWeight: '600',
-  },
-  modalSubmitButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    backgroundColor: '#3498db',
-    marginLeft: 8,
-  },
-  modalSubmitText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontWeight: '600',
-  },
-  sectorChangesList: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 12,
-    gap: 12,
-  },
-  sectorChangeItem: {
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#3498db',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  sectorChangeHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  sectorChangeName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#2c3e50',
-  },
-  sectorChangeTime: {
-    fontSize: 12,
-    color: '#95a5a6',
-    fontStyle: 'italic',
-  },
-  sectorChangeDescription: {
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
-  },
-  noSectorChangesText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    paddingVertical: 8,
   },
 });
 

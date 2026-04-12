@@ -4,10 +4,6 @@ const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
-const { Expo } = require('expo-server-sdk');
-
-// Initialize Expo SDK client for sending push notifications
-const expo = new Expo();
 
 const app = express();
 const PORT = process.env.PORT || 12000;
@@ -38,39 +34,13 @@ function cleanUpOldData() {
 
   let changes = false;
 
-  // 1. Clean crowd updates (> 24h)
+  // 2. Clean crowd updates (> 24h)
   const initialCrowdCount = data.crowdUpdates.length;
   data.crowdUpdates = data.crowdUpdates.filter(u => new Date(u.timestamp) > twentyFourHoursAgo);
   if (data.crowdUpdates.length !== initialCrowdCount) {
     console.log(`✅ Supprimé ${initialCrowdCount - data.crowdUpdates.length} mises à jour d'affluence obsolètes.`);
     changes = true;
   }
-
-  // 2. Clean sector changes (> 7 days)
-  data.gyms.forEach(gym => {
-    if (gym.sectorChanges && gym.sectorChanges.length > 0) {
-      const initialCount = gym.sectorChanges.length;
-      gym.sectorChanges = gym.sectorChanges.filter(c => new Date(c.timestamp) > sevenDaysAgo);
-
-      if (gym.sectorChanges.length !== initialCount) {
-        console.log(`✅ Nettoyé ${initialCount - gym.sectorChanges.length} changements de secteurs pour la salle: ${gym.name}`);
-        changes = true;
-      }
-
-      gym.sectorChangedRecently = gym.sectorChanges.length > 0;
-      if (gym.sectorChanges.length > 0) {
-        gym.lastSectorChange = gym.sectorChanges[0];
-      } else {
-        gym.lastSectorChange = null;
-      }
-    } else if (gym.lastSectorChange && new Date(gym.lastSectorChange.timestamp) < sevenDaysAgo) {
-      // Compatibility with old format
-      console.log(`✅ Réinitialisation du secteur (ancien format) pour la salle: ${gym.name}`);
-      gym.lastSectorChange = null;
-      gym.sectorChangedRecently = false;
-      changes = true;
-    }
-  });
 
   if (changes) {
     writeData(data);
@@ -266,10 +236,6 @@ app.post('/api/subscriptions', (req, res) => {
   data.subscriptions.push(subscription);
   writeData(data);
 
-  // Store push token
-  if (pushToken) {
-    pushTokens.set(userId, pushToken);
-  }
 
   res.json({ subscription, message: 'Abonnement créé' });
 });
@@ -364,100 +330,6 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
   res.json({ gym, message: 'Affluence mise à jour' });
 });
 
-// Report sector change
-app.post('/api/gyms/:id/sector-change', (req, res) => {
-  const { userId, sectorName, description } = req.body;
-  if (!userId) {
-    return res.status(400).json({ error: 'userId requis' });
-  }
-
-  const data = readData();
-  const gym = data.gyms.find(g => g.id === req.params.id);
-
-  if (!gym) {
-    return res.status(404).json({ error: 'Salle non trouvée' });
-  }
-
-  const change = {
-    sectorName: sectorName || 'Non spécifié',
-    description: description || 'Un secteur a été modifié',
-    reportedBy: userId,
-    timestamp: new Date().toISOString()
-  };
-
-  if (!gym.sectorChanges) {
-    gym.sectorChanges = [];
-  }
-
-  // Add to start of array and keep last 10
-  gym.sectorChanges.unshift(change);
-  gym.sectorChanges = gym.sectorChanges.slice(0, 10);
-
-  gym.sectorChangedRecently = true;
-  gym.lastSectorChange = change;
-
-  // Create notifications for subscribers
-  const subscribers = data.subscriptions.filter(s => s.gymId === req.params.id);
-  const notifTitle = `🧗 Nouveauté chez ${gym.name}`;
-  const notifMessage = `Un secteur a été modifié${sectorName ? ` : ${sectorName}` : ''}.${description ? ` ${description}` : ''}`;
-
-  const pushMessages = [];
-
-  subscribers.forEach(sub => {
-    if (sub.userId !== userId) {
-      // In-app notification
-      const notification = {
-        id: uuidv4(),
-        userId: sub.userId,
-        gymId: req.params.id,
-        gymName: gym.name,
-        type: 'sector_change',
-        title: notifTitle,
-        message: notifMessage,
-        read: false,
-        createdAt: new Date().toISOString()
-      };
-      data.notifications.push(notification);
-
-      // Prepare Expo push notification
-      const subscribedUser = data.users.find(u => u.id === sub.userId);
-      const pushToken = subscribedUser?.pushToken;
-
-      if (pushToken && Expo.isExpoPushToken(pushToken)) {
-        pushMessages.push({
-          to: pushToken,
-          sound: 'default',
-          title: notifTitle,
-          body: notifMessage,
-          data: { gymId: req.params.id, gymName: gym.name, type: 'sector_change' },
-        });
-      }
-    }
-  });
-
-  writeData(data);
-
-  // Send push notifications in chunks (Expo recommends batching)
-  if (pushMessages.length > 0) {
-    const chunks = expo.chunkPushNotifications(pushMessages);
-    (async () => {
-      for (const chunk of chunks) {
-        try {
-          const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-          console.log(`📨 Push envoyés:`, ticketChunk);
-        } catch (error) {
-          console.error('❌ Erreur envoi push:', error);
-        }
-      }
-    })();
-  }
-
-  res.json({
-    gym,
-    notifiedUsers: subscribers.length - 1,
-    message: 'Changement de secteur signalé et notifications envoyées'
-  });
-});
 
 // Get user notifications
 app.get('/api/notifications/:userId', (req, res) => {
@@ -494,20 +366,6 @@ app.put('/api/notifications/:userId/read-all', (req, res) => {
   res.json({ message: 'Toutes les notifications marquées comme lues' });
 });
 
-// Reset sector change flag (after viewing)
-app.post('/api/gyms/:id/reset-sector-flag', (req, res) => {
-  const data = readData();
-  const gym = data.gyms.find(g => g.id === req.params.id);
-
-  if (!gym) {
-    return res.status(404).json({ error: 'Salle non trouvée' });
-  }
-
-  gym.sectorChangedRecently = false;
-  writeData(data);
-
-  res.json({ gym, message: 'Flag réinitialisé' });
-});
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -572,10 +430,6 @@ app.get('/api-docs', (req, res) => {
         <code>/api/gyms/:id/crowd</code> - Mettre à jour l'affluence
       </div>
       
-      <div class="endpoint">
-        <span class="method post">POST</span>
-        <code>/api/gyms/:id/sector-change</code> - Signaler un changement de secteur
-      </div>
       
       <div class="endpoint">
         <span class="method get">GET</span>
