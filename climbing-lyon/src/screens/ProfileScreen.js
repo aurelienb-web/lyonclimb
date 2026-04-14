@@ -16,7 +16,7 @@ const ProfileScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#e74c3c" />
+          <ActivityIndicator size="large" color="#e74c3c" animating={true} />
         </View>
       </SafeAreaView>
     );

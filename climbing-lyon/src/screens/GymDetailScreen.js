@@ -174,7 +174,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#e74c3c" />
+        <ActivityIndicator size="large" color="#e74c3c" animating={true} />
       </View>
     );
   }
@@ -187,7 +187,7 @@ const GymDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  const crowdInfo = CROWD_LEVELS.find(c => c.level === gym.crowdLevel) || CROWD_LEVELS[2];
+  const crowdInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(gym.crowdLevel)) || CROWD_LEVELS[2];
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -206,7 +206,7 @@ const GymDetailScreen = ({ route, navigation }) => {
           <TouchableOpacity
             style={[styles.subscribeButton, isSubscribed && styles.subscribedButton]}
             onPress={handleSubscribe}
-            disabled={updating}
+            disabled={Boolean(updating)}
           >
             <Text style={[styles.subscribeText, isSubscribed && styles.subscribedText]}>
               {isSubscribed ? '✓ Abonné' : '+ Suivre'}
@@ -220,11 +220,11 @@ const GymDetailScreen = ({ route, navigation }) => {
           <CrowdSelector
             selectedLevel={selectedCrowd}
             onSelect={handleCrowdUpdate}
-            disabled={!user || updating}
+            disabled={Boolean(!user || updating)}
           />
 
           {selectedCrowd && user && (() => {
-            const myInfo = CROWD_LEVELS.find(c => c.level === selectedCrowd);
+            const myInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(selectedCrowd));
             return myInfo ? (
               <Text style={styles.myContributionText}>
                 {updating ? '⏳ Envoi...' : `✓ Votre contribution : ${myInfo.emoji} ${myInfo.label}`}

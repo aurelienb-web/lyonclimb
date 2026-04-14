@@ -56,12 +56,12 @@ app.get('/api/gyms', (req, res) => {
   const data = readData();
 
   // Recalculate averages for all gyms based on last 30 minutes (latest vote per user)
-  const twoHoursAgo = new Date().getTime() - (30 * 60 * 1000);
+  const recentThreshold = new Date().getTime() - (30 * 60 * 1000);
 
   const updatedGyms = data.gyms.map(gym => {
     const recentUpdates = data.crowdUpdates.filter(u =>
       u.gymId === gym.id &&
-      new Date(u.timestamp).getTime() > twoHoursAgo
+      new Date(u.timestamp).getTime() > recentThreshold
     );
 
     if (recentUpdates.length > 0) {
@@ -75,7 +75,7 @@ app.get('/api/gyms', (req, res) => {
       });
 
       const votes = Object.values(latestVotesPerUser);
-      const sum = votes.reduce((acc, v) => acc + v.level, 0);
+      const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
       return { ...gym, crowdLevel: Math.round(sum / votes.length) };
     }
     return gym;
@@ -95,11 +95,11 @@ app.get('/api/gyms/:id', (req, res) => {
   }
 
   // Recalculate average crowd level (last 30 minutes, latest vote per user)
-  const twoHoursAgo = new Date().getTime() - (30 * 60 * 1000);
+  const recentThreshold = new Date().getTime() - (30 * 60 * 1000);
 
   const recentUpdates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
-    new Date(u.timestamp).getTime() > twoHoursAgo
+    new Date(u.timestamp).getTime() > recentThreshold
   );
 
   let crowdLevel = gym.crowdLevel;
@@ -114,7 +114,7 @@ app.get('/api/gyms/:id', (req, res) => {
     });
 
     const votes = Object.values(latestVotesPerUser);
-    const sum = votes.reduce((acc, v) => acc + v.level, 0);
+    const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
     crowdLevel = Math.round(sum / votes.length);
   }
 
@@ -228,7 +228,8 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     return res.status(400).json({ error: 'userId et crowdLevel requis' });
   }
 
-  if (crowdLevel < 1 || crowdLevel > 5) {
+  const numericCrowdLevel = Number(crowdLevel);
+  if (isNaN(numericCrowdLevel) || numericCrowdLevel < 1 || numericCrowdLevel > 5) {
     return res.status(400).json({ error: 'Niveau d\'affluence entre 1 et 5' });
   }
 
@@ -244,18 +245,18 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     id: uuidv4(),
     gymId: req.params.id,
     userId,
-    crowdLevel,
+    crowdLevel: numericCrowdLevel,
     timestamp: new Date().toISOString()
   };
   data.crowdUpdates.push(update);
 
   // Recalculate average crowd level (last 30 minutes, latest vote per user)
   const now = new Date().getTime();
-  const twoHoursAgo = now - (30 * 60 * 1000);
+  const recentThreshold = now - (30 * 60 * 1000);
 
   const recentUpdates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
-    new Date(u.timestamp).getTime() > twoHoursAgo
+    new Date(u.timestamp).getTime() > recentThreshold
   );
 
   console.log(`[Gym ${req.params.id}] Calculating average from ${recentUpdates.length} recent updates`);
@@ -271,7 +272,7 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     });
 
     const votes = Object.values(latestVotesPerUser);
-    const sum = votes.reduce((acc, v) => acc + v.level, 0);
+    const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
     gym.crowdLevel = Math.round(sum / votes.length);
     console.log(`[Gym ${req.params.id}] New average: ${gym.crowdLevel} (from ${votes.length} users)`);
   } else {

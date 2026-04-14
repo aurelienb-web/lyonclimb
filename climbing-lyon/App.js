@@ -90,7 +90,7 @@ export default function App() {
   return (
     <AuthProvider>
       <NavigationContainer ref={navigationRef}>
-        <StatusBar style="dark" />
+        <StatusBar style="dark" animated={true} />
         <MainTabs />
       </NavigationContainer>
     </AuthProvider>

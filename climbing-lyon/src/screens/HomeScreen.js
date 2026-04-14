@@ -7,7 +7,6 @@ import {
   RefreshControl,
   ActivityIndicator,
   SafeAreaView,
-  StatusBar,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -57,7 +56,7 @@ const HomeScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#e74c3c" />
+        <ActivityIndicator size="large" color="#e74c3c" animating={true} />
         <Text style={styles.loadingText}>Chargement des salles...</Text>
       </View>
     );
@@ -74,7 +73,6 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>🧗 Salles d'Escalade</Text>
         <Text style={styles.headerSubtitle}>Lyon et environs</Text>
@@ -88,7 +86,7 @@ const HomeScreen = ({ navigation }) => {
         )}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={Boolean(refreshing)}
             onRefresh={onRefresh}
             colors={['#e74c3c']}
             tintColor="#e74c3c"

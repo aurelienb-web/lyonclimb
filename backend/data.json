@@ -30,7 +30,7 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 4
+      "crowdLevel": 5
     },
     {
       "id": "2",
@@ -221,6 +221,12 @@
       "email": "aurelien.le.copywriter@gmail.com",
       "name": "aurelien.le.copywriter",
       "createdAt": "2026-02-26T20:00:18.475Z"
+    },
+    {
+      "id": "dev_mnyo5yei_zp9s0k8n",
+      "deviceId": "dev_mnyo5yei_zp9s0k8n",
+      "name": "iPhone",
+      "createdAt": "2026-04-14T13:40:41.853Z"
     }
   ],
   "subscriptions": [
@@ -254,6 +260,167 @@
       "userId": "dev_mnye3wrl_632ab36c",
       "crowdLevel": 4,
       "timestamp": "2026-04-14T09:00:30.306Z"
+    },
+    {
+      "id": "d2b706f0-d119-4467-b3a7-30ab640f3246",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T10:09:17.599Z"
+    },
+    {
+      "id": "8f8065e4-185a-4c8a-b32a-c320cf2a07d5",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T10:09:20.988Z"
+    },
+    {
+      "id": "21185add-014f-4089-919d-a3d1a64a301a",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 2,
+      "timestamp": "2026-04-14T10:09:29.654Z"
+    },
+    {
+      "id": "e2beaa1a-c640-49c5-b9de-8446f7499029",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-14T10:09:46.368Z"
+    },
+    {
+      "id": "901407f3-fad0-467d-8942-92221abd18ef",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-14T10:09:48.959Z"
+    },
+    {
+      "id": "5a7f3f76-a5f5-4dfc-9102-bc05907fd8f6",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T13:40:54.469Z"
+    },
+    {
+      "id": "90c2a490-4f09-4431-bd72-a00d59bf353c",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T13:41:05.260Z"
+    },
+    {
+      "id": "85c029d4-6251-4af8-8ce3-9adf0a306900",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-14T13:41:06.713Z"
+    },
+    {
+      "id": "602b8360-aec1-4f8c-aad4-e19812dcf2cd",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T13:41:26.594Z"
+    },
+    {
+      "id": "b8a07697-f74a-437f-95b1-cac35a5b9c2b",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T13:41:33.734Z"
+    },
+    {
+      "id": "5b608f57-bba4-4a17-8fca-5ffc4cd0220d",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-14T13:41:51.680Z"
+    },
+    {
+      "id": "e28e9b8a-47d3-4bfb-9059-e07fc7278a26",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T13:42:00.208Z"
+    },
+    {
+      "id": "7e7e0627-ba3c-4805-a7a0-63d1f8c04d58",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T13:42:30.514Z"
+    },
+    {
+      "id": "ff296fb9-8fdc-4909-91ad-561f1723d625",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T13:42:36.237Z"
+    },
+    {
+      "id": "08591bad-876f-4e60-9df3-804f9027d912",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T13:54:19.737Z"
+    },
+    {
+      "id": "01313683-da9c-4366-9ab5-a5dff4f341ec",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-14T13:54:21.264Z"
+    },
+    {
+      "id": "3794a650-9900-4d02-a1f1-267333b8df2e",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T13:54:21.856Z"
+    },
+    {
+      "id": "cd7e64fa-b9a2-4296-8ba2-601b2a84ab2f",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T13:54:27.308Z"
+    },
+    {
+      "id": "11f80799-7e3d-4e46-ab1c-d8fc62855809",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-14T13:54:39.083Z"
+    },
+    {
+      "id": "5a996d09-85ea-4a22-a502-3f287197f667",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-14T13:54:41.962Z"
+    },
+    {
+      "id": "d2b669aa-8681-450e-9746-1c467ca2dbb3",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-14T13:54:54.136Z"
+    },
+    {
+      "id": "72e50215-61f0-4d94-b4e5-28d1e812f69d",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T13:54:55.813Z"
+    },
+    {
+      "id": "c37a9742-5527-4df2-901d-293c16ef5635",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-14T13:55:02.312Z"
     }
   ]
 }

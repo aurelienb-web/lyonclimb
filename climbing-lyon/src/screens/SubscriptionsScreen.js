@@ -74,7 +74,7 @@ const SubscriptionsScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#e74c3c" />
+        <ActivityIndicator size="large" color="#e74c3c" animating={true} />
       </View>
     );
   }
@@ -105,7 +105,7 @@ const SubscriptionsScreen = ({ navigation }) => {
           )}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={Boolean(refreshing)}
               onRefresh={onRefresh}
               colors={['#e74c3c']}
               tintColor="#e74c3c"
