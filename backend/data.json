@@ -30,7 +30,7 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 5
+      "crowdLevel": 3
     },
     {
       "id": "2",
@@ -421,6 +421,55 @@
       "userId": "dev_mnyo5yei_zp9s0k8n",
       "crowdLevel": 5,
       "timestamp": "2026-04-14T13:55:02.312Z"
+    },
+    {
+      "id": "36b530f7-0ded-46fc-8688-40656ad7ac4b",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-14T13:57:52.234Z"
+    },
+    {
+      "id": "e32067ed-4724-44b3-8dc2-4221817c93f1",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T13:57:55.119Z"
+    },
+    {
+      "id": "694341d5-f403-4756-a512-6e8a045a790a",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T14:11:05.922Z"
+    },
+    {
+      "id": "75a9f8b7-54f6-4b6c-9e22-92b3f0259d50",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T14:15:17.618Z"
+    },
+    {
+      "id": "886bf677-99a2-4326-9c2b-2380b63c3cec",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 2,
+      "timestamp": "2026-04-14T14:15:23.009Z"
+    },
+    {
+      "id": "d4c074d8-39eb-4062-91cd-512421024238",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-14T14:15:32.439Z"
+    },
+    {
+      "id": "78ad45a8-d4ac-4cf8-99b3-8a2a01658bab",
+      "gymId": "1",
+      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-14T14:15:36.785Z"
     }
   ]
 }

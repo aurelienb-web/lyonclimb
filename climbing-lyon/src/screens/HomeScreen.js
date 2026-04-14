@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import GymCard from '../components/GymCard';
 import { getGyms } from '../services/api';
+import { subscribeToCrowdUpdates } from '../services/socketService';
 
 const HomeScreen = ({ navigation }) => {
   const [gyms, setGyms] = useState([]);
@@ -36,6 +37,15 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadGyms();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCrowdUpdates((data) => {
+      setGyms((currentGyms) =>
+        currentGyms.map(g => g.id === data.gymId ? { ...g, crowdLevel: data.crowdLevel } : g)
+      );
+    });
+    return () => unsubscribe();
   }, []);
 
   useFocusEffect(

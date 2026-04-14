@@ -23,6 +23,7 @@ import {
   getUserSubscriptions,
   updateCrowdLevel,
 } from '../services/api';
+import { subscribeToCrowdUpdates } from '../services/socketService';
 
 const CROWD_LEVELS = [
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
@@ -75,6 +76,15 @@ const GymDetailScreen = ({ route, navigation }) => {
       checkSubscription();
     }, [user])
   );
+
+  useEffect(() => {
+    const unsubscribe = subscribeToCrowdUpdates((data) => {
+      if (data.gymId === gymId) {
+        setGym(prev => prev ? { ...prev, crowdLevel: data.crowdLevel } : null);
+      }
+    });
+    return () => unsubscribe();
+  }, [gymId]);
 
   const handleSubscribe = async () => {
     if (!user) {

@@ -6,6 +6,16 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 const PORT = process.env.PORT || 12000;
 
 app.use(cors());
@@ -281,6 +291,12 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
   writeData(data);
 
+  // Emit real-time update
+  io.emit('gym_crowd_updated', {
+    gymId: req.params.id,
+    crowdLevel: gym.crowdLevel
+  });
+
   res.json({ gym, message: 'Affluence mise à jour' });
 });
 
@@ -358,7 +374,8 @@ app.get('/api-docs', (req, res) => {
 cleanUpOldData();
 setInterval(cleanUpOldData, 60 * 60 * 1000); // Every hour
 
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🧗 Serveur démarré sur le port ${PORT}`);
   console.log(`📍 API disponible sur http://localhost:${PORT}/api`);
+  console.log(`🔌 WebSockets activés`);
 });
