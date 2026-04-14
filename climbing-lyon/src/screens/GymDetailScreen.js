@@ -34,7 +34,7 @@ const CROWD_LEVELS = [
 
 const GymDetailScreen = ({ route, navigation }) => {
   const { gymId } = route.params;
-  const { user, pushToken } = useAuth();
+  const { user } = useAuth();
 
   const [gym, setGym] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -80,7 +80,7 @@ const GymDetailScreen = ({ route, navigation }) => {
     if (!user) {
       Alert.alert(
         'Connexion requise',
-        'Connectez-vous pour suivre cette salle et recevoir les notifications.',
+        'Connectez-vous pour suivre cette salle.',
         [
           { text: 'Annuler', style: 'cancel' },
           { text: 'Se connecter', onPress: () => navigation.navigate('Profile') },
@@ -96,7 +96,7 @@ const GymDetailScreen = ({ route, navigation }) => {
         setIsSubscribed(false);
         Alert.alert('✓', 'Vous ne suivez plus cette salle');
       } else {
-        await subscribe(user.id, gymId, pushToken);
+        await subscribe(user.id, gymId);
         setIsSubscribed(true);
         Alert.alert('✓', 'Vous suivez maintenant cette salle !');
       }

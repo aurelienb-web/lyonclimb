@@ -9,9 +9,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import HomeScreen from './src/screens/HomeScreen';
 import GymDetailScreen from './src/screens/GymDetailScreen';
 import SubscriptionsScreen from './src/screens/SubscriptionsScreen';
-import NotificationsScreen from './src/screens/NotificationsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
-import { setupNotificationListener } from './src/services/notificationService';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -20,7 +18,6 @@ const TabIcon = ({ name, focused }) => {
   const icons = {
     'Salles': '🧗',
     'Mes salles': '⭐',
-    'Notifications': '🔔',
     'Profil': '👤',
   };
   
@@ -79,7 +76,6 @@ const MainTabs = () => (
   >
     <Tab.Screen name="Salles" component={HomeStack} />
     <Tab.Screen name="Mes salles" component={SubscriptionsScreen} />
-    <Tab.Screen name="Notifications" component={NotificationsScreen} />
     <Tab.Screen name="Profil" component={ProfileScreen} />
   </Tab.Navigator>
 );
@@ -88,15 +84,7 @@ export default function App() {
   const navigationRef = useRef(null);
 
   useEffect(() => {
-    // Setup listener for when user taps a push notification
-    const cleanup = setupNotificationListener({
-      navigate: (screen, params) => {
-        if (navigationRef.current) {
-          navigationRef.current.navigate(screen, params);
-        }
-      }
-    });
-    return cleanup;
+    // Basic app initialization can go here
   }, []);
 
   return (

@@ -37,15 +37,11 @@ export const register = async (email, name) => {
   return response.data;
 };
 
-export const registerPushToken = async (userId, token) => {
-  const response = await api.post(`/users/${userId}/push-token`, { token });
-  return response.data;
-};
 
 
 // Subscriptions
-export const subscribe = async (userId, gymId, pushToken = null) => {
-  const response = await api.post('/subscriptions', { userId, gymId, pushToken });
+export const subscribe = async (userId, gymId) => {
+  const response = await api.post('/subscriptions', { userId, gymId });
   return response.data;
 };
 
@@ -65,21 +61,5 @@ export const updateCrowdLevel = async (gymId, userId, crowdLevel) => {
   return response.data;
 };
 
-
-// Notifications
-export const getNotifications = async (userId) => {
-  const response = await api.get(`/notifications/${userId}`);
-  return response.data;
-};
-
-export const markNotificationRead = async (notificationId) => {
-  const response = await api.put(`/notifications/${notificationId}/read`);
-  return response.data;
-};
-
-export const markAllNotificationsRead = async (userId) => {
-  const response = await api.put(`/notifications/${userId}/read-all`);
-  return response.data;
-};
 
 export default api;

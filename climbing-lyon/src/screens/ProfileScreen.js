@@ -86,14 +86,14 @@ const ProfileScreen = () => {
             <View style={styles.infoCard}>
               <Text style={styles.infoTitle}>⭐ Suivez vos salles</Text>
               <Text style={styles.infoText}>
-                Abonnez-vous à vos salles préférées pour être notifié des changements de secteur.
+                Abonnez-vous à vos salles préférées pour les retrouver facilement.
               </Text>
             </View>
 
             <View style={styles.infoCard}>
               <Text style={styles.infoTitle}>🤝 Contribuez</Text>
               <Text style={styles.infoText}>
-                Partagez l'affluence en temps réel et signalez les nouveaux secteurs pour aider la communauté.
+                Partagez l'affluence en temps réel pour aider la communauté.
               </Text>
             </View>
           </View>
@@ -158,7 +158,7 @@ const ProfileScreen = () => {
             <View style={styles.featureItem}>
               <Text style={styles.featureIcon}>🔔</Text>
               <Text style={styles.featureText}>
-                Recevez les notifications de nouveaux secteurs
+                Consultez les horaires et tarifs mis à jour
               </Text>
             </View>
             <View style={styles.featureItem}>

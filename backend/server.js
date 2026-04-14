@@ -24,7 +24,7 @@ function writeData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// Clean up old data (crowd updates > 24h, sector changes > 7 days)
+// Clean up old data (crowd updates > 24h)
 function cleanUpOldData() {
   console.log('🧹 Exécution du nettoyage des données...');
   const data = readData();
@@ -50,28 +50,6 @@ function cleanUpOldData() {
   }
 }
 
-// POST register/update push token for a user
-app.post('/api/users/:userId/push-token', (req, res) => {
-  const { userId } = req.params;
-  const { token } = req.body;
-
-  if (!token) {
-    return res.status(400).json({ error: 'token requis' });
-  }
-
-  const data = readData();
-  const user = data.users.find(u => u.id === userId);
-
-  if (!user) {
-    return res.status(404).json({ error: 'Utilisateur non trouvé' });
-  }
-
-  user.pushToken = token;
-  writeData(data);
-
-  console.log(`📱 Token push enregistré pour ${user.email}: ${token}`);
-  res.json({ message: 'Token enregistré', token });
-});
 
 // GET all gyms
 app.get('/api/gyms', (req, res) => {
@@ -209,7 +187,7 @@ app.post('/api/auth/login', (req, res) => {
 
 // Subscribe to a gym
 app.post('/api/subscriptions', (req, res) => {
-  const { userId, gymId, pushToken } = req.body;
+  const { userId, gymId } = req.body;
   if (!userId || !gymId) {
     return res.status(400).json({ error: 'userId et gymId requis' });
   }
@@ -229,7 +207,6 @@ app.post('/api/subscriptions', (req, res) => {
     id: uuidv4(),
     userId,
     gymId,
-    pushToken: pushToken || null,
     createdAt: new Date().toISOString()
   };
 
@@ -331,41 +308,6 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 });
 
 
-// Get user notifications
-app.get('/api/notifications/:userId', (req, res) => {
-  const data = readData();
-  const notifications = data.notifications
-    .filter(n => n.userId === req.params.userId)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  res.json(notifications);
-});
-
-// Mark notification as read
-app.put('/api/notifications/:id/read', (req, res) => {
-  const data = readData();
-  const notification = data.notifications.find(n => n.id === req.params.id);
-
-  if (!notification) {
-    return res.status(404).json({ error: 'Notification non trouvée' });
-  }
-
-  notification.read = true;
-  writeData(data);
-
-  res.json({ notification, message: 'Notification marquée comme lue' });
-});
-
-// Mark all notifications as read for a user
-app.put('/api/notifications/:userId/read-all', (req, res) => {
-  const data = readData();
-  data.notifications
-    .filter(n => n.userId === req.params.userId)
-    .forEach(n => n.read = true);
-  writeData(data);
-
-  res.json({ message: 'Toutes les notifications marquées comme lues' });
-});
-
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -430,11 +372,6 @@ app.get('/api-docs', (req, res) => {
         <code>/api/gyms/:id/crowd</code> - Mettre à jour l'affluence
       </div>
       
-      
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/notifications/:userId</code> - Notifications utilisateur
-      </div>
     </body>
     </html>
   `);
