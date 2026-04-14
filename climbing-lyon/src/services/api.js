@@ -26,18 +26,11 @@ export const getGym = async (id, userId = null) => {
   return response.data;
 };
 
-// Auth
-export const login = async (email) => {
-  const response = await api.post('/auth/login', { email });
+// Device-based auth (no email required)
+export const registerDevice = async (deviceId, deviceName) => {
+  const response = await api.post('/auth/device', { deviceId, deviceName });
   return response.data;
 };
-
-export const register = async (email, name) => {
-  const response = await api.post('/auth/register', { email, name });
-  return response.data;
-};
-
-
 
 // Subscriptions
 export const subscribe = async (userId, gymId) => {

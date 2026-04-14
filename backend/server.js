@@ -137,52 +137,28 @@ app.get('/api/gyms/:id', (req, res) => {
   });
 });
 
-// Register user (simple email-based auth)
-app.post('/api/auth/register', (req, res) => {
-  const { email, name } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email requis' });
+// Register or retrieve a device-based user (no email required)
+app.post('/api/auth/device', (req, res) => {
+  const { deviceId, deviceName } = req.body;
+  if (!deviceId) {
+    return res.status(400).json({ error: 'deviceId requis' });
   }
 
   const data = readData();
-  let user = data.users.find(u => u.email === email);
+  let user = data.users.find(u => u.deviceId === deviceId);
 
   if (!user) {
     user = {
-      id: uuidv4(),
-      email,
-      name: name || email.split('@')[0],
+      id: deviceId,
+      deviceId,
+      name: deviceName || 'Appareil',
       createdAt: new Date().toISOString()
     };
     data.users.push(user);
     writeData(data);
   }
 
-  res.json({ user, message: 'Connexion réussie' });
-});
-
-// Login user
-app.post('/api/auth/login', (req, res) => {
-  const { email } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email requis' });
-  }
-
-  const data = readData();
-  let user = data.users.find(u => u.email === email);
-
-  if (!user) {
-    user = {
-      id: uuidv4(),
-      email,
-      name: email.split('@')[0],
-      createdAt: new Date().toISOString()
-    };
-    data.users.push(user);
-    writeData(data);
-  }
-
-  res.json({ user, message: 'Connexion réussie' });
+  res.json({ user, message: 'Appareil enregistré' });
 });
 
 // Subscribe to a gym
