@@ -32,8 +32,27 @@ const VisitSlotModal = ({ visible, onConfirm, onClose }) => {
     return regex.test(val);
   };
 
+  const [prevTime, setPrevTime] = useState(`${defaultHour}:${defaultMin}`);
+
   const handleTimeChange = (val) => {
-    setTime(val);
+    // Si on efface et qu'on vient de supprimer le ":" (on passe de length 3 à 2 dans cleaned)
+    // ou si on est à length 3 avec le ":" à la fin
+    let cleaned = val.replace(/\D/g, '');
+    
+    // Si l'utilisateur a supprimé le ":" manuellement (val.length < prevTime.length)
+    // et que le curseur était juste après le ":"
+    if (val.length < prevTime.length && prevTime.includes(':') && !val.includes(':')) {
+       // On supprime un chiffre de plus pour "dépasser" le blocage du formatage auto
+       cleaned = cleaned.slice(0, -1);
+    }
+
+    let formatted = cleaned;
+    if (cleaned.length >= 3) {
+      formatted = cleaned.slice(0, 2) + ':' + cleaned.slice(2, 4);
+    }
+    
+    setTime(formatted);
+    setPrevTime(formatted);
     if (timeError) setTimeError('');
   };
 

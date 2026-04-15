@@ -42,31 +42,32 @@ const personCountToCrowdLevel = (count) => {
   return 5;
 };
 
-// Calculate forecast crowdLevel from history votes in a given time window
-const computeForecast = (history, arrivalTime, duration) => {
-  if (!history || history.length === 0) return null;
+// Calculate forecast crowdLevel based on number of planned visits overlapping with the window
+const computeForecast = (plannedVisits, arrivalTime, duration) => {
+  if (!plannedVisits || plannedVisits.length === 0) return 1; // Default to Très calme if empty
 
   // Parse arrival as minutes-since-midnight
   const [h, m] = arrivalTime.split(':').map(Number);
   const arrivalMins = h * 60 + m;
   const departureMins = arrivalMins + duration;
 
-  // We keep a ±30 min tolerance around the visit window
-  const windowStart = arrivalMins - 30;
-  const windowEnd = departureMins + 30;
+  // Count how many people are there during our stay
+  // A person is "there" if their window [start2, end2] overlaps with ours [start, end]
+  const overlapping = plannedVisits.filter((v) => {
+    const [h2, m2] = v.arrivalTime.split(':').map(Number);
+    const start2 = h2 * 60 + m2;
+    const end2 = start2 + v.duration;
 
-  const matching = history.filter((u) => {
-    const ts = new Date(u.timestamp);
-    const mins = ts.getHours() * 60 + ts.getMinutes();
-    return mins >= windowStart && mins <= windowEnd;
+    // Overlap condition: start1 < end2 AND start2 < end1
+    return arrivalMins < end2 && start2 < departureMins;
   });
 
-  if (matching.length < 2) return null; // Not enough data
-
-  // Average of votes
-  const sum = matching.reduce((acc, u) => acc + Number(u.crowdLevel), 0);
-  const avg = sum / matching.length;
-  return Math.round(avg);
+  const count = overlapping.length;
+  if (count < 5) return 1;
+  if (count < 10) return 2;
+  if (count < 15) return 3;
+  if (count < 20) return 4;
+  return 5;
 };
 
 const VISIT_SLOT_KEY_PREFIX = 'visitSlot_';
@@ -84,7 +85,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   // Visit slot state
   const [visitSlot, setVisitSlot] = useState(null); // { arrivalTime, duration } | null
   const [slotModalVisible, setSlotModalVisible] = useState(false);
-  const [crowdHistory, setCrowdHistory] = useState([]);
+  const [plannedVisits, setPlannedVisits] = useState([]);
   const [forecastLevel, setForecastLevel] = useState(null);
 
   // ─── Load gym ────────────────────────────────────────────────────────────
@@ -101,13 +102,14 @@ const GymDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  // ─── Load crowd history ───────────────────────────────────────────────────
-  const loadHistory = async () => {
+  // ─── Load crowd history & planned slots ──────────────────────────────────
+  const loadHistoryAndSlots = async () => {
     try {
-      const history = await getGymCrowdHistory(gymId);
-      setCrowdHistory(history);
+      const data = await getGymCrowdHistory(gymId);
+      // data is now { updates, plannedVisits }
+      setPlannedVisits(data.plannedVisits || []);
     } catch (err) {
-      console.error('Erreur historique affluence:', err);
+      console.error('Erreur historique/créneaux:', err);
     }
   };
 
@@ -117,13 +119,11 @@ const GymDetailScreen = ({ route, navigation }) => {
       const raw = await AsyncStorage.getItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
       if (raw) {
         const saved = JSON.parse(raw);
-        // Only keep slot if it was saved today
         const savedDate = new Date(saved.savedAt).toDateString();
         const today = new Date().toDateString();
         if (savedDate === today) {
           setVisitSlot(saved.slot);
         } else {
-          // Clear stale slot
           await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
         }
       }
@@ -138,6 +138,13 @@ const GymDetailScreen = ({ route, navigation }) => {
         `${VISIT_SLOT_KEY_PREFIX}${gymId}`,
         JSON.stringify({ slot, savedAt: new Date().toISOString() })
       );
+      
+      // Also register on server if logged in
+      if (user) {
+        await registerVisitSlot(gymId, user.id, slot);
+        // Refresh slots from server to update forecast count
+        loadHistoryAndSlots();
+      }
     } catch (err) {
       console.error('Erreur sauvegarde créneau:', err);
     }
@@ -157,7 +164,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   // ─── Effects ──────────────────────────────────────────────────────────────
   useEffect(() => {
     loadGym();
-    loadHistory();
+    loadHistoryAndSlots();
     loadVisitSlot();
   }, [gymId]);
 
@@ -177,15 +184,15 @@ const GymDetailScreen = ({ route, navigation }) => {
     return () => unsubscribe();
   }, [gymId]);
 
-  // Recompute forecast when slot or history changes
+  // Recompute forecast when slot or plannedVisits changes
   useEffect(() => {
     if (visitSlot) {
-      const level = computeForecast(crowdHistory, visitSlot.arrivalTime, visitSlot.duration);
+      const level = computeForecast(plannedVisits, visitSlot.arrivalTime, visitSlot.duration);
       setForecastLevel(level);
     } else {
       setForecastLevel(null);
     }
-  }, [visitSlot, crowdHistory]);
+  }, [visitSlot, plannedVisits]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleSlotConfirm = async (slot) => {
@@ -660,8 +667,10 @@ const styles = StyleSheet.create({
   // ── Locked banner ─────────────────────────────────────────────────────────
   lockedBanner: {
     borderRadius: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     overflow: 'hidden',
+    minHeight: 280, // Augmenté pour s'assurer que tout le contenu (icône, texte, bouton) loge
+    backgroundColor: '#f8f9fa',
   },
   crowdBannerBlurred: {
     padding: 16,
@@ -687,14 +696,15 @@ const styles = StyleSheet.create({
   },
   blurOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.88)',
+    backgroundColor: 'rgba(255,255,255,0.92)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#dde1e7',
     borderStyle: 'dashed',
+    zIndex: 10,
   },
   lockIcon: {
     fontSize: 28,

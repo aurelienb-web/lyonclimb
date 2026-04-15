@@ -30,7 +30,7 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 3
+      "crowdLevel": 4
     },
     {
       "id": "2",
@@ -421,6 +421,27 @@
       "userId": "dev_mnyo5yei_zp9s0k8n",
       "crowdLevel": 1,
       "timestamp": "2026-04-14T14:15:36.785Z"
+    },
+    {
+      "id": "6d95fe50-f7ae-48de-8d2e-e9849224d6eb",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-15T10:22:21.620Z"
+    },
+    {
+      "id": "588b1d7e-49c2-4516-a4ab-29a2e15919b7",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-15T10:22:22.556Z"
+    },
+    {
+      "id": "93083475-28c7-4cf2-b74f-12d55ca7edf9",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-15T12:41:33.016Z"
     }
   ]
 }

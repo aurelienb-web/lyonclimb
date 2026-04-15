@@ -52,6 +52,15 @@ function cleanUpOldData() {
     changes = true;
   }
 
+  // 3. Clean planned visits (> 24h)
+  if (!data.plannedVisits) data.plannedVisits = [];
+  const initialSlotCount = data.plannedVisits.length;
+  data.plannedVisits = data.plannedVisits.filter(v => new Date(v.createdAt) > twentyFourHoursAgo);
+  if (data.plannedVisits.length !== initialSlotCount) {
+    console.log(`✅ Supprimé ${initialSlotCount - data.plannedVisits.length} créneaux planifiés obsolètes.`);
+    changes = true;
+  }
+
   if (changes) {
     writeData(data);
     console.log('💾 Données nettoyées et sauvegardées.');
@@ -302,6 +311,34 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
 
 
+// Register a planned visit slot
+app.post('/api/gyms/:id/slots', (req, res) => {
+  const { userId, arrivalTime, duration } = req.body;
+  if (!userId || !arrivalTime || !duration) {
+    return res.status(400).json({ error: 'userId, arrivalTime et duration requis' });
+  }
+
+  const data = readData();
+  if (!data.plannedVisits) data.plannedVisits = [];
+
+  // Remove previous slot for this user/gym if exists (latest intention only)
+  data.plannedVisits = data.plannedVisits.filter(v => !(v.userId === userId && v.gymId === req.params.id));
+
+  const visit = {
+    id: uuidv4(),
+    gymId: req.params.id,
+    userId,
+    arrivalTime,
+    duration,
+    createdAt: new Date().toISOString()
+  };
+
+  data.plannedVisits.push(visit);
+  writeData(data);
+
+  res.json({ visit, message: 'Visite planifiée enregistrée' });
+});
+
 // GET crowd history for a gym (last 7 days) — used for crowd forecast
 app.get('/api/gyms/:id/crowd-history', (req, res) => {
   const data = readData();
@@ -313,12 +350,20 @@ app.get('/api/gyms/:id/crowd-history', (req, res) => {
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const history = data.crowdUpdates.filter(u =>
+  const updates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
     new Date(u.timestamp) > sevenDaysAgo
   );
 
-  res.json(history);
+  const currentSlots = (data.plannedVisits || []).filter(v => 
+    v.gymId === req.params.id &&
+    new Date(v.createdAt).toDateString() === new Date().toDateString()
+  );
+
+  res.json({
+    updates,
+    plannedVisits: currentSlots
+  });
 });
 
 // Health check

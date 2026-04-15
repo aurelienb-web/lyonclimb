@@ -59,5 +59,13 @@ export const getGymCrowdHistory = async (gymId) => {
   return response.data;
 };
 
+export const registerVisitSlot = async (gymId, userId, slot) => {
+  const response = await api.post(`/gyms/${gymId}/slots`, {
+    userId,
+    arrivalTime: slot.arrivalTime,
+    duration: slot.duration
+  });
+  return response.data;
+};
 
 export default api;
