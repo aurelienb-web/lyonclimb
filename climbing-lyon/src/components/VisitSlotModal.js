@@ -18,7 +18,7 @@ const DURATIONS = [
   { label: '3h+', value: 180 },
 ];
 
-const VisitSlotModal = ({ visible, onConfirm, onClose }) => {
+const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
   const now = new Date();
   const defaultHour = String(now.getHours()).padStart(2, '0');
   const defaultMin = String(now.getMinutes()).padStart(2, '0');
@@ -61,6 +61,41 @@ const VisitSlotModal = ({ visible, onConfirm, onClose }) => {
       setTimeError('Format invalide (HH:MM)');
       return;
     }
+
+    // Validation des horaires d'ouverture
+    if (openingHours) {
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const todayKey = days[new Date().getDay()];
+      const hoursString = openingHours[todayKey];
+
+      if (!hoursString || hoursString === 'Fermé') {
+        setTimeError('La salle est fermée aujourd\'hui.');
+        return;
+      }
+
+      const [openTime, closeTime] = hoursString.split('-');
+      
+      const toMins = (t) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 60 + m;
+      };
+
+      const startMins = toMins(time);
+      const endMins = startMins + selectedDuration;
+      const openMins = toMins(openTime);
+      const closeMins = toMins(closeTime);
+
+      if (startMins < openMins) {
+        setTimeError(`La salle n'ouvre qu'à ${openTime}.`);
+        return;
+      }
+
+      if (endMins > closeMins) {
+        setTimeError(`Le créneau dépasse la fermeture (${closeTime}).`);
+        return;
+      }
+    }
+
     onConfirm({ arrivalTime: time, duration: selectedDuration });
   };
 

@@ -22,6 +22,7 @@ import {
   getUserSubscriptions,
   updateCrowdLevel,
   getGymCrowdHistory,
+  registerVisitSlot,
 } from '../services/api';
 import { subscribeToCrowdUpdates } from '../services/socketService';
 
@@ -488,6 +489,7 @@ const GymDetailScreen = ({ route, navigation }) => {
       {/* Visit slot modal */}
       <VisitSlotModal
         visible={slotModalVisible}
+        openingHours={gym?.openingHours}
         onConfirm={handleSlotConfirm}
         onClose={() => setSlotModalVisible(false)}
       />
