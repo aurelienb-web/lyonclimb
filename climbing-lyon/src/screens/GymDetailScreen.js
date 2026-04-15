@@ -140,7 +140,7 @@ const GymDetailScreen = ({ route, navigation }) => {
         `${VISIT_SLOT_KEY_PREFIX}${gymId}`,
         JSON.stringify({ slot, savedAt: new Date().toISOString() })
       );
-      
+
       // Also register on server if logged in
       if (user) {
         await registerVisitSlot(gymId, user.id, slot);
@@ -299,8 +299,8 @@ const GymDetailScreen = ({ route, navigation }) => {
 
   const durationLabel = visitSlot
     ? [60, 90, 120, 150, 180]
-        .map((v, i) => ({ v, l: ['1h', '1h30', '2h', '2h30', '3h+'][i] }))
-        .find(x => x.v === visitSlot.duration)?.l || `${visitSlot.duration / 60}h`
+      .map((v, i) => ({ v, l: ['1h', '1h30', '2h', '2h30', '3h+'][i] }))
+      .find(x => x.v === visitSlot.duration)?.l || `${visitSlot.duration / 60}h`
     : '';
 
   return (
@@ -326,30 +326,6 @@ const GymDetailScreen = ({ route, navigation }) => {
               {isSubscribed ? '✓ Abonné' : '+ Suivre'}
             </Text>
           </TouchableOpacity>
-        </View>
-
-        {/* Contribution section */}
-        <View style={styles.contributionSection}>
-          <Text style={styles.contributionTitle}>🤝 Contribuez</Text>
-
-          <CrowdSelector
-            selectedLevel={selectedCrowd}
-            onSelect={handleCrowdUpdate}
-            disabled={Boolean(!user || updating)}
-          />
-
-          {selectedCrowd && user && (() => {
-            const myInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(selectedCrowd));
-            return myInfo ? (
-              <Text style={styles.myContributionText}>
-                {updating ? '⏳ Envoi...' : `✓ Votre contribution : ${myInfo.emoji} ${myInfo.label}`}
-              </Text>
-            ) : null;
-          })()}
-
-          {!user && (
-            <Text style={styles.loginHint}>Connectez-vous pour contribuer</Text>
-          )}
         </View>
 
         {/* ── Affluence actuelle (conditionally blurred) ─────────────────── */}
@@ -380,7 +356,6 @@ const GymDetailScreen = ({ route, navigation }) => {
                 <Text style={[styles.forecastLabel, { color: forecastInfo.color }]}>
                   {forecastInfo.label}
                 </Text>
-                <Text style={styles.forecastHint}> (données historiques)</Text>
               </View>
             ) : (
               <Text style={styles.forecastNoData}>
@@ -389,9 +364,9 @@ const GymDetailScreen = ({ route, navigation }) => {
             )}
 
             {/* Daily forecast chart */}
-            <CrowdChart 
-              plannedVisits={plannedVisits} 
-              openingHours={gym?.openingHours} 
+            <CrowdChart
+              plannedVisits={plannedVisits}
+              openingHours={gym?.openingHours}
             />
 
             {/* Reset */}
@@ -426,6 +401,30 @@ const GymDetailScreen = ({ route, navigation }) => {
             </View>
           </View>
         )}
+
+        {/* Contribution section */}
+        <View style={styles.contributionSection}>
+          <Text style={styles.contributionTitle}>🤝 Contribuez</Text>
+
+          <CrowdSelector
+            selectedLevel={selectedCrowd}
+            onSelect={handleCrowdUpdate}
+            disabled={Boolean(!user || updating)}
+          />
+
+          {selectedCrowd && user && (() => {
+            const myInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(selectedCrowd));
+            return myInfo ? (
+              <Text style={styles.myContributionText}>
+                {updating ? '⏳ Envoi...' : `✓ Votre contribution : ${myInfo.emoji} ${myInfo.label}`}
+              </Text>
+            ) : null;
+          })()}
+
+          {!user && (
+            <Text style={styles.loginHint}>Connectez-vous pour contribuer</Text>
+          )}
+        </View>
 
         <Text style={styles.description}>{gym.description}</Text>
 

@@ -4,6 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 
 import { AuthProvider } from './src/context/AuthContext';
 import HomeScreen from './src/screens/HomeScreen';
@@ -88,12 +90,15 @@ export default function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <NavigationContainer ref={navigationRef}>
-        <StatusBar style="dark" animated={true} />
-        <MainTabs />
-      </NavigationContainer>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigationContainer ref={navigationRef}>
+          <StatusBar style="dark" animated={true} />
+          <MainTabs />
+        </NavigationContainer>
+      </AuthProvider>
+    </SafeAreaProvider>
+
   );
 }
 
