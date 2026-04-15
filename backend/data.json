@@ -30,7 +30,7 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 2
+      "crowdLevel": 3
     },
     {
       "id": "2",
@@ -477,6 +477,13 @@
       "userId": "dev_mnye3wrl_632ab36c",
       "crowdLevel": 2,
       "timestamp": "2026-04-15T12:48:10.293Z"
+    },
+    {
+      "id": "e238b7d5-8e41-4601-880f-5891735b9366",
+      "gymId": "1",
+      "userId": "dev_mnye3wrl_632ab36c",
+      "crowdLevel": 3,
+      "timestamp": "2026-04-15T13:27:36.117Z"
     }
   ],
   "plannedVisits": [
@@ -529,12 +536,124 @@
       "createdAt": "2026-04-15T12:52:52.953Z"
     },
     {
-      "id": "9e624083-ea40-4017-8e92-317e0312fdbc",
+      "id": "5aa77a4e-f072-4677-8014-399521948638",
       "gymId": "1",
       "userId": "dev_mnye3wrl_632ab36c",
-      "arrivalTime": "14:56",
-      "duration": 150,
-      "createdAt": "2026-04-15T12:58:22.730Z"
+      "arrivalTime": "15:13",
+      "duration": 90,
+      "createdAt": "2026-04-15T13:13:39.200Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_7",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_8",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_9",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_10",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_11",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_12",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_13",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_14",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_15",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_16",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_17",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_18",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_19",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
+    },
+    {
+      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "gymId": "1",
+      "userId": "simu_user_20",
+      "arrivalTime": "18:00",
+      "duration": 120,
+      "createdAt": "2026-04-15T12:52:52.953Z"
     }
   ]
 }

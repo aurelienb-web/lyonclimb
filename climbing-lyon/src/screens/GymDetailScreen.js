@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import CrowdSelector from '../components/CrowdSelector';
 import VisitSlotModal from '../components/VisitSlotModal';
+import CrowdChart from '../components/CrowdChart';
 import {
   getGym,
   subscribe,
@@ -386,6 +387,12 @@ const GymDetailScreen = ({ route, navigation }) => {
                 Pas assez de données pour ce créneau
               </Text>
             )}
+
+            {/* Daily forecast chart */}
+            <CrowdChart 
+              plannedVisits={plannedVisits} 
+              openingHours={gym?.openingHours} 
+            />
 
             {/* Reset */}
             <TouchableOpacity onPress={handleResetSlot} style={styles.resetButton}>
