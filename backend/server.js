@@ -302,6 +302,25 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
 
 
+// GET crowd history for a gym (last 7 days) — used for crowd forecast
+app.get('/api/gyms/:id/crowd-history', (req, res) => {
+  const data = readData();
+  const gym = data.gyms.find(g => g.id === req.params.id);
+
+  if (!gym) {
+    return res.status(404).json({ error: 'Salle non trouvée' });
+  }
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const history = data.crowdUpdates.filter(u =>
+    u.gymId === req.params.id &&
+    new Date(u.timestamp) > sevenDaysAgo
+  );
+
+  res.json(history);
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });

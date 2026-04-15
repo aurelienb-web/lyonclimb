@@ -54,5 +54,10 @@ export const updateCrowdLevel = async (gymId, userId, crowdLevel) => {
   return response.data;
 };
 
+export const getGymCrowdHistory = async (gymId) => {
+  const response = await api.get(`/gyms/${gymId}/crowd-history`);
+  return response.data;
+};
+
 
 export default api;

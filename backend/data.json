@@ -248,55 +248,6 @@
   "notifications": [],
   "crowdUpdates": [
     {
-      "id": "fdcbf5cb-c98d-49cc-9b79-9c3b4d551c88",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 1,
-      "timestamp": "2026-04-14T09:00:28.696Z"
-    },
-    {
-      "id": "7ff71e34-ca7a-4ab2-81b0-4d79b05689e0",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 4,
-      "timestamp": "2026-04-14T09:00:30.306Z"
-    },
-    {
-      "id": "d2b706f0-d119-4467-b3a7-30ab640f3246",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 1,
-      "timestamp": "2026-04-14T10:09:17.599Z"
-    },
-    {
-      "id": "8f8065e4-185a-4c8a-b32a-c320cf2a07d5",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 3,
-      "timestamp": "2026-04-14T10:09:20.988Z"
-    },
-    {
-      "id": "21185add-014f-4089-919d-a3d1a64a301a",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 2,
-      "timestamp": "2026-04-14T10:09:29.654Z"
-    },
-    {
-      "id": "e2beaa1a-c640-49c5-b9de-8446f7499029",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 4,
-      "timestamp": "2026-04-14T10:09:46.368Z"
-    },
-    {
-      "id": "901407f3-fad0-467d-8942-92221abd18ef",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 5,
-      "timestamp": "2026-04-14T10:09:48.959Z"
-    },
-    {
       "id": "5a7f3f76-a5f5-4dfc-9102-bc05907fd8f6",
       "gymId": "1",
       "userId": "dev_mnyo5yei_zp9s0k8n",

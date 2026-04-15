@@ -9,19 +9,19 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
-  Modal,
-  TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import CrowdSelector from '../components/CrowdSelector';
+import VisitSlotModal from '../components/VisitSlotModal';
 import {
   getGym,
   subscribe,
   unsubscribe,
   getUserSubscriptions,
   updateCrowdLevel,
+  getGymCrowdHistory,
 } from '../services/api';
 import { subscribeToCrowdUpdates } from '../services/socketService';
 
@@ -33,6 +33,44 @@ const CROWD_LEVELS = [
   { level: 5, label: 'Très fréquenté', color: '#e74c3c', emoji: '🔴' },
 ];
 
+// Convert a person count to a crowdLevel  (< 5 → 1, < 10 → 2, < 15 → 3, < 20 → 4, ≥ 20 → 5)
+const personCountToCrowdLevel = (count) => {
+  if (count < 5) return 1;
+  if (count < 10) return 2;
+  if (count < 15) return 3;
+  if (count < 20) return 4;
+  return 5;
+};
+
+// Calculate forecast crowdLevel from history votes in a given time window
+const computeForecast = (history, arrivalTime, duration) => {
+  if (!history || history.length === 0) return null;
+
+  // Parse arrival as minutes-since-midnight
+  const [h, m] = arrivalTime.split(':').map(Number);
+  const arrivalMins = h * 60 + m;
+  const departureMins = arrivalMins + duration;
+
+  // We keep a ±30 min tolerance around the visit window
+  const windowStart = arrivalMins - 30;
+  const windowEnd = departureMins + 30;
+
+  const matching = history.filter((u) => {
+    const ts = new Date(u.timestamp);
+    const mins = ts.getHours() * 60 + ts.getMinutes();
+    return mins >= windowStart && mins <= windowEnd;
+  });
+
+  if (matching.length < 2) return null; // Not enough data
+
+  // Average of votes
+  const sum = matching.reduce((acc, u) => acc + Number(u.crowdLevel), 0);
+  const avg = sum / matching.length;
+  return Math.round(avg);
+};
+
+const VISIT_SLOT_KEY_PREFIX = 'visitSlot_';
+
 const GymDetailScreen = ({ route, navigation }) => {
   const { gymId } = route.params;
   const { user } = useAuth();
@@ -43,6 +81,13 @@ const GymDetailScreen = ({ route, navigation }) => {
   const [selectedCrowd, setSelectedCrowd] = useState(null);
   const [updating, setUpdating] = useState(false);
 
+  // Visit slot state
+  const [visitSlot, setVisitSlot] = useState(null); // { arrivalTime, duration } | null
+  const [slotModalVisible, setSlotModalVisible] = useState(false);
+  const [crowdHistory, setCrowdHistory] = useState([]);
+  const [forecastLevel, setForecastLevel] = useState(null);
+
+  // ─── Load gym ────────────────────────────────────────────────────────────
   const loadGym = async () => {
     try {
       const data = await getGym(gymId, user?.id);
@@ -56,6 +101,49 @@ const GymDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  // ─── Load crowd history ───────────────────────────────────────────────────
+  const loadHistory = async () => {
+    try {
+      const history = await getGymCrowdHistory(gymId);
+      setCrowdHistory(history);
+    } catch (err) {
+      console.error('Erreur historique affluence:', err);
+    }
+  };
+
+  // ─── Load persisted visit slot ────────────────────────────────────────────
+  const loadVisitSlot = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        // Only keep slot if it was saved today
+        const savedDate = new Date(saved.savedAt).toDateString();
+        const today = new Date().toDateString();
+        if (savedDate === today) {
+          setVisitSlot(saved.slot);
+        } else {
+          // Clear stale slot
+          await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
+        }
+      }
+    } catch (err) {
+      console.error('Erreur lecture créneau:', err);
+    }
+  };
+
+  const saveVisitSlot = async (slot) => {
+    try {
+      await AsyncStorage.setItem(
+        `${VISIT_SLOT_KEY_PREFIX}${gymId}`,
+        JSON.stringify({ slot, savedAt: new Date().toISOString() })
+      );
+    } catch (err) {
+      console.error('Erreur sauvegarde créneau:', err);
+    }
+  };
+
+  // ─── Check subscription ───────────────────────────────────────────────────
   const checkSubscription = async () => {
     if (!user) return;
     try {
@@ -66,8 +154,11 @@ const GymDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  // ─── Effects ──────────────────────────────────────────────────────────────
   useEffect(() => {
     loadGym();
+    loadHistory();
+    loadVisitSlot();
   }, [gymId]);
 
   useFocusEffect(
@@ -85,6 +176,29 @@ const GymDetailScreen = ({ route, navigation }) => {
     });
     return () => unsubscribe();
   }, [gymId]);
+
+  // Recompute forecast when slot or history changes
+  useEffect(() => {
+    if (visitSlot) {
+      const level = computeForecast(crowdHistory, visitSlot.arrivalTime, visitSlot.duration);
+      setForecastLevel(level);
+    } else {
+      setForecastLevel(null);
+    }
+  }, [visitSlot, crowdHistory]);
+
+  // ─── Handlers ─────────────────────────────────────────────────────────────
+  const handleSlotConfirm = async (slot) => {
+    setVisitSlot(slot);
+    await saveVisitSlot(slot);
+    setSlotModalVisible(false);
+  };
+
+  const handleResetSlot = async () => {
+    setVisitSlot(null);
+    setForecastLevel(null);
+    await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
+  };
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -121,7 +235,7 @@ const GymDetailScreen = ({ route, navigation }) => {
     if (!user) {
       Alert.alert(
         'Connexion requise',
-        'Connectez-vous pour mettre à jour l\'affluence.',
+        "Connectez-vous pour mettre à jour l'affluence.",
         [
           { text: 'Annuler', style: 'cancel' },
           { text: 'Se connecter', onPress: () => navigation.navigate('Profile') },
@@ -135,52 +249,24 @@ const GymDetailScreen = ({ route, navigation }) => {
     try {
       setUpdating(true);
       const result = await updateCrowdLevel(gymId, user.id, level);
-      // Met à jour la salle (crowdLevel = moyenne calculée côté serveur)
       setGym(prev => ({ ...prev, crowdLevel: result.gym.crowdLevel }));
-      // selectedCrowd reste sur le niveau cliqué par l'utilisateur
     } catch (error) {
-      // Rollback en cas d'erreur
       setSelectedCrowd(previousCrowd);
-      Alert.alert('Erreur', 'Impossible de mettre à jour l\'affluence');
+      Alert.alert('Erreur', "Impossible de mettre à jour l'affluence");
     } finally {
       setUpdating(false);
     }
   };
 
-
-  const openWebsite = () => {
-    if (gym?.website) {
-      Linking.openURL(gym.website);
-    }
-  };
-
+  const openWebsite = () => { if (gym?.website) Linking.openURL(gym.website); };
   const openMaps = () => {
     if (gym?.address) {
-      const url = `https://maps.google.com/?q=${encodeURIComponent(gym.address)}`;
-      Linking.openURL(url);
+      Linking.openURL(`https://maps.google.com/?q=${encodeURIComponent(gym.address)}`);
     }
   };
+  const callGym = () => { if (gym?.phone) Linking.openURL(`tel:${gym.phone}`); };
 
-  const callGym = () => {
-    if (gym?.phone) {
-      Linking.openURL(`tel:${gym.phone}`);
-    }
-  };
-
-  const getTimeAgo = (timestamp) => {
-    const now = new Date();
-    const past = new Date(timestamp);
-    const diffInMs = now - past;
-    const diffInMins = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-    if (diffInMins < 1) return "à l'instant";
-    if (diffInMins < 60) return `il y a ${diffInMins} min`;
-    if (diffInHours < 24) return `il y a ${diffInHours}h`;
-    return `il y a ${diffInDays}j`;
-  };
-
+  // ─── Render helpers ───────────────────────────────────────────────────────
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -198,13 +284,22 @@ const GymDetailScreen = ({ route, navigation }) => {
   }
 
   const crowdInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(gym.crowdLevel)) || CROWD_LEVELS[2];
+  const forecastInfo = forecastLevel
+    ? CROWD_LEVELS.find(c => c.level === forecastLevel) || CROWD_LEVELS[2]
+    : null;
+
+  const durationLabel = visitSlot
+    ? [60, 90, 120, 150, 180]
+        .map((v, i) => ({ v, l: ['1h', '1h30', '2h', '2h30', '3h+'][i] }))
+        .find(x => x.v === visitSlot.duration)?.l || `${visitSlot.duration / 60}h`
+    : '';
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={{ uri: gym.image }} style={styles.image} />
 
-
       <View style={styles.content}>
+        {/* Header */}
         <View style={styles.headerRow}>
           <View style={styles.titleContainer}>
             <Text style={styles.name}>{gym.name}</Text>
@@ -224,6 +319,7 @@ const GymDetailScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
+        {/* Contribution section */}
         <View style={styles.contributionSection}>
           <Text style={styles.contributionTitle}>🤝 Contribuez</Text>
 
@@ -237,32 +333,88 @@ const GymDetailScreen = ({ route, navigation }) => {
             const myInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(selectedCrowd));
             return myInfo ? (
               <Text style={styles.myContributionText}>
-                {updating ? '⏳ Envoi...' : `✓ Votre contribution : ${myInfo.emoji} ${myInfo.label}`}
+                {updating ? '⏳ Envoi...' : `✓ Votre contribution : ${myInfo.emoji} ${myInfo.label}`}
               </Text>
             ) : null;
           })()}
 
-
           {!user && (
-            <Text style={styles.loginHint}>
-              Connectez-vous pour contribuer
-            </Text>
+            <Text style={styles.loginHint}>Connectez-vous pour contribuer</Text>
           )}
         </View>
 
-        <View style={[styles.crowdBanner, { backgroundColor: crowdInfo.color + '15' }]}>
-          <Text style={styles.crowdTitle}>Affluence actuelle</Text>
-          <View style={styles.crowdDisplay}>
-            <Text style={styles.crowdEmoji}>{crowdInfo.emoji}</Text>
-            <Text style={[styles.crowdLabel, { color: crowdInfo.color }]}>
-              {crowdInfo.label}
-            </Text>
+        {/* ── Affluence actuelle (conditionally blurred) ─────────────────── */}
+        {visitSlot ? (
+          // UNLOCKED — show real crowd level
+          <View style={[styles.crowdBanner, { backgroundColor: crowdInfo.color + '15' }]}>
+            <View style={styles.crowdBannerHeader}>
+              <Text style={styles.crowdTitle}>Affluence actuelle</Text>
+              <TouchableOpacity onPress={() => setSlotModalVisible(true)}>
+                <Text style={styles.slotChip}>
+                  🕐 {visitSlot.arrivalTime} · {durationLabel}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.crowdDisplay}>
+              <Text style={styles.crowdEmoji}>{crowdInfo.emoji}</Text>
+              <Text style={[styles.crowdLabel, { color: crowdInfo.color }]}>
+                {crowdInfo.label}
+              </Text>
+            </View>
+
+            {/* Forecast section */}
+            <View style={styles.forecastDivider} />
+            <Text style={styles.forecastTitle}>📊 Prévision pour votre créneau</Text>
+            {forecastInfo ? (
+              <View style={styles.forecastRow}>
+                <Text style={styles.forecastEmoji}>{forecastInfo.emoji}</Text>
+                <Text style={[styles.forecastLabel, { color: forecastInfo.color }]}>
+                  {forecastInfo.label}
+                </Text>
+                <Text style={styles.forecastHint}> (données historiques)</Text>
+              </View>
+            ) : (
+              <Text style={styles.forecastNoData}>
+                Pas assez de données pour ce créneau
+              </Text>
+            )}
+
+            {/* Reset */}
+            <TouchableOpacity onPress={handleResetSlot} style={styles.resetButton}>
+              <Text style={styles.resetText}>Réinitialiser le créneau</Text>
+            </TouchableOpacity>
           </View>
-        </View>
+        ) : (
+          // LOCKED — blurred overlay
+          <View style={styles.lockedBanner}>
+            {/* Blurred content behind overlay */}
+            <View style={[styles.crowdBannerBlurred, { backgroundColor: '#f39c1215' }]}>
+              <Text style={styles.crowdTitleBlurred}>Affluence actuelle</Text>
+              <View style={styles.crowdDisplay}>
+                <Text style={[styles.crowdEmojiBlurred]}>🟡</Text>
+                <Text style={styles.crowdLabelBlurred}>••••••</Text>
+              </View>
+            </View>
+            {/* Overlay */}
+            <View style={styles.blurOverlay}>
+              <Text style={styles.lockIcon}>🔒</Text>
+              <Text style={styles.lockTitle}>Renseignez votre créneau</Text>
+              <Text style={styles.lockSubtitle}>
+                Indiquez quand vous prévoyez de venir pour débloquer l'affluence et obtenir une prévision personnalisée
+              </Text>
+              <TouchableOpacity
+                style={styles.unlockButton}
+                onPress={() => setSlotModalVisible(true)}
+              >
+                <Text style={styles.unlockButtonText}>🗓️ Définir mon créneau</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <Text style={styles.description}>{gym.description}</Text>
 
-
+        {/* Contact */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact</Text>
           <TouchableOpacity onPress={callGym}>
@@ -273,6 +425,7 @@ const GymDetailScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
+        {/* Pricing */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>💰 Tarifs</Text>
           <View style={styles.pricingGrid}>
@@ -299,6 +452,7 @@ const GymDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
 
+        {/* Opening hours */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🕐 Horaires</Text>
           {Object.entries(gym.openingHours).map(([day, hours]) => (
@@ -311,6 +465,7 @@ const GymDetailScreen = ({ route, navigation }) => {
           ))}
         </View>
 
+        {/* Features */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>✨ Équipements</Text>
           <View style={styles.featuresContainer}>
@@ -323,6 +478,12 @@ const GymDetailScreen = ({ route, navigation }) => {
         </View>
       </View>
 
+      {/* Visit slot modal */}
+      <VisitSlotModal
+        visible={slotModalVisible}
+        onConfirm={handleSlotConfirm}
+        onClose={() => setSlotModalVisible(false)}
+      />
     </ScrollView>
   );
 };
@@ -382,30 +543,194 @@ const styles = StyleSheet.create({
   subscribedText: {
     color: '#fff',
   },
+  // ── Contribution section ──────────────────────────────────────────────────
+  contributionSection: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  contributionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#2c3e50',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  myContributionText: {
+    textAlign: 'center',
+    color: '#27ae60',
+    fontWeight: '600',
+    fontSize: 14,
+    marginTop: 10,
+  },
+  loginHint: {
+    textAlign: 'center',
+    color: '#95a5a6',
+    marginTop: 12,
+    fontSize: 13,
+  },
+  // ── Crowd banner (unlocked) ───────────────────────────────────────────────
   crowdBanner: {
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 16,
+  },
+  crowdBannerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 10,
   },
   crowdTitle: {
     fontSize: 12,
     color: '#7f8c8d',
-    marginBottom: 8,
     textTransform: 'uppercase',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  slotChip: {
+    fontSize: 12,
+    color: '#3498db',
+    fontWeight: '600',
+    backgroundColor: '#ebf5fb',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   crowdDisplay: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 4,
   },
   crowdEmoji: {
-    fontSize: 20,
+    fontSize: 22,
     marginRight: 8,
   },
   crowdLabel: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  // ── Forecast ─────────────────────────────────────────────────────────────
+  forecastDivider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    marginVertical: 12,
+  },
+  forecastTitle: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    textTransform: 'uppercase',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    marginBottom: 6,
+  },
+  forecastRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  forecastEmoji: {
     fontSize: 18,
+    marginRight: 6,
+  },
+  forecastLabel: {
+    fontSize: 16,
     fontWeight: '700',
   },
+  forecastHint: {
+    fontSize: 12,
+    color: '#95a5a6',
+    marginLeft: 4,
+  },
+  forecastNoData: {
+    fontSize: 14,
+    color: '#95a5a6',
+    fontStyle: 'italic',
+  },
+  resetButton: {
+    marginTop: 14,
+    alignSelf: 'flex-end',
+  },
+  resetText: {
+    fontSize: 12,
+    color: '#95a5a6',
+    textDecorationLine: 'underline',
+  },
+  // ── Locked banner ─────────────────────────────────────────────────────────
+  lockedBanner: {
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  crowdBannerBlurred: {
+    padding: 16,
+  },
+  crowdTitleBlurred: {
+    fontSize: 12,
+    color: '#7f8c8d',
+    textTransform: 'uppercase',
+    fontWeight: '600',
+    marginBottom: 10,
+    opacity: 0.5,
+  },
+  crowdEmojiBlurred: {
+    fontSize: 22,
+    marginRight: 8,
+    opacity: 0.2,
+  },
+  crowdLabelBlurred: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#bdc3c7',
+    letterSpacing: 6,
+  },
+  blurOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.88)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#dde1e7',
+    borderStyle: 'dashed',
+  },
+  lockIcon: {
+    fontSize: 28,
+    marginBottom: 8,
+  },
+  lockTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#2c3e50',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  lockSubtitle: {
+    fontSize: 13,
+    color: '#7f8c8d',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  unlockButton: {
+    backgroundColor: '#e74c3c',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: '#e74c3c',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  unlockButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  // ── Misc ──────────────────────────────────────────────────────────────────
   description: {
     fontSize: 15,
     lineHeight: 22,
@@ -476,45 +801,6 @@ const styles = StyleSheet.create({
   featureText: {
     fontSize: 14,
     color: '#555',
-  },
-  contributionSection: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 8,
-    marginBottom: 40,
-  },
-  contributionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2c3e50',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  reportButton: {
-    backgroundColor: '#3498db',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  reportButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  myContributionText: {
-    textAlign: 'center',
-    color: '#27ae60',
-    fontWeight: '600',
-    fontSize: 14,
-    marginTop: 10,
-  },
-  loginHint: {
-    textAlign: 'center',
-    color: '#95a5a6',
-    marginTop: 12,
-    fontSize: 13,
   },
   errorText: {
     fontSize: 16,
