@@ -128,6 +128,8 @@ app.get('/api/gyms/:id', (req, res) => {
   );
 
   let crowdLevel = gym.crowdLevel;
+  let crowdUpdatesCount = 0;
+
   if (recentUpdates.length > 0) {
     // Group by user and take latest vote
     const latestVotesPerUser = {};
@@ -141,6 +143,7 @@ app.get('/api/gyms/:id', (req, res) => {
     const votes = Object.values(latestVotesPerUser);
     const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
     crowdLevel = Math.round(sum / votes.length);
+    crowdUpdatesCount = votes.length;
   }
 
   // Get user's last contribution (ever, or could be last 24h)
@@ -158,6 +161,7 @@ app.get('/api/gyms/:id', (req, res) => {
   res.json({
     ...gym,
     crowdLevel,
+    crowdUpdatesCount,
     userLastContribution
   });
 });
@@ -286,6 +290,8 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
   console.log(`[Gym ${req.params.id}] Calculating average from ${recentUpdates.length} recent updates`);
 
+  let crowdUpdatesCount = 0;
+
   if (recentUpdates.length > 0) {
     // Group by user and take latest vote
     const latestVotesPerUser = {};
@@ -299,6 +305,7 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     const votes = Object.values(latestVotesPerUser);
     const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
     gym.crowdLevel = Math.round(sum / votes.length);
+    crowdUpdatesCount = votes.length;
     console.log(`[Gym ${req.params.id}] New average: ${gym.crowdLevel} (from ${votes.length} users)`);
   } else {
     gym.crowdLevel = crowdLevel;
@@ -309,10 +316,11 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
   // Emit real-time update
   io.emit('gym_crowd_updated', {
     gymId: req.params.id,
-    crowdLevel: gym.crowdLevel
+    crowdLevel: gym.crowdLevel,
+    crowdUpdatesCount
   });
 
-  res.json({ gym, message: 'Affluence mise à jour' });
+  res.json({ gym: { ...gym, crowdUpdatesCount }, message: 'Affluence mise à jour' });
 });
 
 

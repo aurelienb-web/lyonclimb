@@ -163,7 +163,9 @@ const CrowdChart = ({ plannedVisits, openingHours, date }) => {
                   
                   {isSelected && (
                     <View style={styles.tooltip}>
-                      <Text style={styles.tooltipText}>{slot.count} pers.</Text>
+                      <Text style={styles.tooltipText}>
+                        {CROWD_LEVELS.find(cl => cl.level === slot.level)?.label}
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     height: 145, // Augmenté pour barres plus grandes + tooltips
     paddingBottom: 25,
-    paddingHorizontal: 10,
+    paddingHorizontal: 45, // Augmenté pour que les infobulles aux extrémités soient visibles
   },
   barWrapper: {
     alignItems: 'center',
@@ -240,16 +242,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -25,
     backgroundColor: '#1a2332',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    minWidth: 45,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    zIndex: 100,
     alignItems: 'center',
+    // On enlève minWidth pour que ça s'adapte au texte (ex: "Très fréquenté")
   },
   tooltipText: {
     color: '#fff',
     fontSize: 10,
     fontWeight: '700',
+    whiteSpace: 'nowrap',
   },
   emptyContainer: {
     padding: 20,

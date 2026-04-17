@@ -206,7 +206,11 @@ const GymDetailScreen = ({ route, navigation }) => {
   useEffect(() => {
     const unsubscribe = subscribeToCrowdUpdates((data) => {
       if (data.gymId === gymId) {
-        setGym(prev => prev ? { ...prev, crowdLevel: data.crowdLevel } : null);
+        setGym(prev => prev ? { 
+          ...prev, 
+          crowdLevel: data.crowdLevel,
+          crowdUpdatesCount: data.crowdUpdatesCount 
+        } : null);
       }
     });
     return () => unsubscribe();
@@ -365,12 +369,9 @@ const GymDetailScreen = ({ route, navigation }) => {
           // UNLOCKED — show real crowd level
           <View style={[styles.crowdBanner, { backgroundColor: crowdInfo.color + '15' }]}>
             <View style={styles.crowdBannerHeader}>
-              <Text style={styles.crowdTitle}>Affluence actuelle</Text>
-              <TouchableOpacity onPress={() => setSlotModalVisible(true)}>
-                <Text style={styles.slotChip}>
-                  📅 {isSlotTomorrow ? 'Demain' : "Aujourd'hui"} · {visitSlot.arrivalTime}
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.crowdTitle}>
+                Affluence actuelle ({gym.crowdUpdatesCount || 0} contribution{gym.crowdUpdatesCount > 1 ? 's' : ''})
+              </Text>
             </View>
             <View style={styles.crowdDisplay}>
               <Text style={styles.crowdEmoji}>{crowdInfo.emoji}</Text>
@@ -421,10 +422,18 @@ const GymDetailScreen = ({ route, navigation }) => {
               date={viewingDate}
             />
 
-            {/* Reset */}
-            <TouchableOpacity onPress={handleResetSlot} style={styles.resetButton}>
-              <Text style={styles.resetText}>Réinitialiser le créneau</Text>
-            </TouchableOpacity>
+            {/* Slot Footer */}
+            <View style={styles.slotFooter}>
+              <TouchableOpacity onPress={() => setSlotModalVisible(true)}>
+                <Text style={styles.slotChip}>
+                  📅 {isSlotTomorrow ? 'Demain' : "Aujourd'hui"} · {visitSlot.arrivalTime}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleResetSlot} style={styles.resetButton}>
+                <Text style={styles.resetText}>Réinitialiser le créneau</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           // LOCKED — blurred overlay
@@ -711,10 +720,7 @@ const styles = StyleSheet.create({
   },
   dayTabActive: {
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    boxShadow: '0 1 2 rgba(0, 0, 0, 0.1)',
     elevation: 2,
   },
   dayTabText: {
@@ -748,13 +754,18 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   resetButton: {
-    marginTop: 14,
-    alignSelf: 'flex-end',
+    // Bouton à droite via le footer
   },
   resetText: {
     fontSize: 12,
     color: '#95a5a6',
     textDecorationLine: 'underline',
+  },
+  slotFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 14,
   },
   // ── Locked banner ─────────────────────────────────────────────────────────
   lockedBanner: {
@@ -821,10 +832,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
-    shadowColor: '#e74c3c',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
+    boxShadow: '0 3 6 rgba(231, 76, 60, 0.25)',
     elevation: 3,
   },
   unlockButtonText: {

@@ -168,6 +168,23 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
       return;
     }
 
+    const toMins = (t) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    // Validation du créneau passé
+    const nowLocal = new Date();
+    const todayStrLocal = nowLocal.toISOString().split('T')[0];
+    if (selectedDay === todayStrLocal) {
+      const currentMins = nowLocal.getHours() * 60 + nowLocal.getMinutes();
+      const startMins = toMins(time);
+      if (startMins < currentMins) {
+        setTimeError("L'heure de début est déjà passée.");
+        return;
+      }
+    }
+
     // Validation des horaires d'ouverture
     if (openingHours) {
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -182,11 +199,6 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
 
       const [openTime, closeTime] = hoursString.split('-');
       
-      const toMins = (t) => {
-        const [h, m] = t.split(':').map(Number);
-        return h * 60 + m;
-      };
-
       const startMins = toMins(time);
       const endMins = startMins + selectedDuration;
       const openMins = toMins(openTime);
@@ -224,8 +236,7 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1, justifyContent: 'flex-end', width: '100%' }}
-          pointerEvents="box-none"
+          style={{ flex: 1, justifyContent: 'flex-end', width: '100%', pointerEvents: 'box-none' }}
         >
           <Animated.View
             style={[
@@ -458,10 +469,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 12,
-    shadowColor: '#e74c3c',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    boxShadow: '0 4 8 rgba(231, 76, 60, 0.3)',
     elevation: 4,
   },
   confirmText: {

@@ -62,7 +62,7 @@
         "Bar"
       ],
       "image": "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=400",
-      "crowdLevel": 2
+      "crowdLevel": 5
     },
     {
       "id": "3",
@@ -343,18 +343,30 @@
       "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
       "crowdLevel": 1,
       "timestamp": "2026-04-16T21:36:06.430Z"
+    },
+    {
+      "id": "6fc1ee88-78dd-4216-b78e-1123359197b8",
+      "gymId": "2",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-17T09:32:24.736Z"
+    },
+    {
+      "id": "e5f30513-a6e2-40e3-b5ec-89bc04951392",
+      "gymId": "2",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 4,
+      "timestamp": "2026-04-17T09:32:25.382Z"
+    },
+    {
+      "id": "4d9a65c5-8121-4b71-8a3a-3926908db589",
+      "gymId": "2",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-17T09:32:26.088Z"
     }
   ],
   "plannedVisits": [
-    {
-      "id": "4d4ac675-fb4a-411b-873f-ab13d0aed3ee",
-      "gymId": "1",
-      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
-      "arrivalTime": "11:11",
-      "duration": 120,
-      "visitDate": "2026-04-17",
-      "createdAt": "2026-04-17T08:49:09.935Z"
-    },
     {
       "id": "baee5ee5-b44b-41d3-9efe-7a610a6ddb29",
       "gymId": "2",
@@ -372,6 +384,24 @@
       "duration": 90,
       "visitDate": "2026-04-17",
       "createdAt": "2026-04-17T09:22:33.077Z"
+    },
+    {
+      "id": "3db478c5-0cda-49b5-82b2-99ee08f46937",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "arrivalTime": "10:00",
+      "duration": 90,
+      "visitDate": "2026-04-17",
+      "createdAt": "2026-04-17T20:42:56.584Z"
+    },
+    {
+      "id": "d5032c75-9894-4a93-be2d-9a6346cc7870",
+      "gymId": "1",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "arrivalTime": "10:00",
+      "duration": 90,
+      "visitDate": "2026-04-18",
+      "createdAt": "2026-04-17T20:56:59.341Z"
     }
   ]
 }
