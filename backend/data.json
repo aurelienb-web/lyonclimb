@@ -395,13 +395,22 @@
       "createdAt": "2026-04-17T20:42:56.584Z"
     },
     {
-      "id": "d5032c75-9894-4a93-be2d-9a6346cc7870",
+      "id": "01392bf0-08eb-42de-a219-61fb0b8816ae",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "arrivalTime": "10:00",
+      "duration": 90,
+      "visitDate": "2026-04-18",
+      "createdAt": "2026-04-17T21:19:11.954Z"
+    },
+    {
+      "id": "e04cce66-f6d0-4fa3-b452-caab9d169225",
       "gymId": "1",
       "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
       "arrivalTime": "10:00",
       "duration": 90,
       "visitDate": "2026-04-18",
-      "createdAt": "2026-04-17T20:56:59.341Z"
+      "createdAt": "2026-04-17T21:29:55.390Z"
     }
   ]
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { getGymStatus } from '../utils/timeUtils';
 
 const CROWD_LEVELS = [
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
@@ -11,14 +12,20 @@ const CROWD_LEVELS = [
 
 const GymCard = ({ gym, onPress }) => {
   const crowdInfo = CROWD_LEVELS.find(c => c.level === gym.crowdLevel) || CROWD_LEVELS[2];
+  const status = getGymStatus(gym.openingHours);
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <Image 
-        source={{ uri: gym.image }} 
-        style={styles.image}
-        defaultSource={require('../../assets/placeholder.png')}
-      />
+      <View style={styles.imageContainer}>
+        <Image 
+          source={{ uri: gym.image }} 
+          style={styles.image}
+          defaultSource={require('../../assets/placeholder.png')}
+        />
+        <View style={[styles.statusBadge, { backgroundColor: status.color }]}>
+          <Text style={styles.statusText}>{status.label}</Text>
+        </View>
+      </View>
       <View style={styles.content}>
         <Text style={styles.name}>{gym.name}</Text>
         <Text style={styles.address} numberOfLines={1}>{gym.address}</Text>
@@ -59,10 +66,32 @@ const styles = StyleSheet.create({
     elevation: 3,
     overflow: 'hidden',
   },
-  image: {
+  imageContainer: {
+    position: 'relative',
     width: '100%',
     height: 160,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
     backgroundColor: '#f0f0f0',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    boxShadow: '0 2 4 rgba(0, 0, 0, 0.2)',
+    elevation: 4,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   content: {
     padding: 16,

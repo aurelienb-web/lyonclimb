@@ -229,6 +229,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleSlotConfirm = async (slot) => {
     setVisitSlot(slot);
+    setViewingDate(slot.date);
     await saveVisitSlot(slot);
     await loadHistoryAndSlots(slot.date);
     setSlotModalVisible(false);
@@ -237,8 +238,9 @@ const GymDetailScreen = ({ route, navigation }) => {
   const handleResetSlot = async () => {
     setVisitSlot(null);
     setForecastLevel(null);
+    setViewingDate(todayStr);
     await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
-    await loadHistoryAndSlots();
+    await loadHistoryAndSlots(todayStr);
     setSlotModalVisible(true);
   };
 
