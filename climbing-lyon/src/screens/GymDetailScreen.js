@@ -85,10 +85,18 @@ const GymDetailScreen = ({ route, navigation }) => {
   const [updating, setUpdating] = useState(false);
 
   // Visit slot state
-  const [visitSlot, setVisitSlot] = useState(null); // { arrivalTime, duration } | null
+  const [visitSlot, setVisitSlot] = useState(null); // { arrivalTime, duration, date } | null
   const [slotModalVisible, setSlotModalVisible] = useState(false);
   const [plannedVisits, setPlannedVisits] = useState([]);
   const [forecastLevel, setForecastLevel] = useState(null);
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  const [viewingDate, setViewingDate] = useState(todayStr); // YYYY-MM-DD
 
   // ─── Load gym ────────────────────────────────────────────────────────────
   const loadGym = async () => {
@@ -105,9 +113,10 @@ const GymDetailScreen = ({ route, navigation }) => {
   };
 
   // ─── Load crowd history & planned slots ──────────────────────────────────
-  const loadHistoryAndSlots = async () => {
+  const loadHistoryAndSlots = async (date = null) => {
     try {
-      const data = await getGymCrowdHistory(gymId);
+      const targetDate = date || viewingDate;
+      const data = await getGymCrowdHistory(gymId, targetDate);
       // data is now { updates, plannedVisits }
       setPlannedVisits(data.plannedVisits || []);
     } catch (err) {
@@ -121,10 +130,13 @@ const GymDetailScreen = ({ route, navigation }) => {
       const raw = await AsyncStorage.getItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
       if (raw) {
         const saved = JSON.parse(raw);
-        const savedDate = new Date(saved.savedAt).toDateString();
-        const today = new Date().toDateString();
-        if (savedDate === today) {
+        const slotDate = saved.slot.date || saved.savedAt.split('T')[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Keep if it's today or in the future
+        if (slotDate >= todayStr) {
           setVisitSlot(saved.slot);
+          return saved.slot;
         } else {
           await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
         }
@@ -132,6 +144,7 @@ const GymDetailScreen = ({ route, navigation }) => {
     } catch (err) {
       console.error('Erreur lecture créneau:', err);
     }
+    return null;
   };
 
   const saveVisitSlot = async (slot) => {
@@ -165,10 +178,23 @@ const GymDetailScreen = ({ route, navigation }) => {
 
   // ─── Effects ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    loadGym();
-    loadHistoryAndSlots();
-    loadVisitSlot();
+    const init = async () => {
+      await loadGym();
+      const savedSlot = await loadVisitSlot();
+      if (savedSlot?.date) {
+        setViewingDate(savedSlot.date);
+        await loadHistoryAndSlots(savedSlot.date);
+      } else {
+        await loadHistoryAndSlots(todayStr);
+      }
+    };
+    init();
   }, [gymId]);
+
+  // Refetch when viewingDate changes
+  useEffect(() => {
+    loadHistoryAndSlots(viewingDate);
+  }, [viewingDate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -200,6 +226,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   const handleSlotConfirm = async (slot) => {
     setVisitSlot(slot);
     await saveVisitSlot(slot);
+    await loadHistoryAndSlots(slot.date);
     setSlotModalVisible(false);
   };
 
@@ -207,6 +234,8 @@ const GymDetailScreen = ({ route, navigation }) => {
     setVisitSlot(null);
     setForecastLevel(null);
     await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
+    await loadHistoryAndSlots();
+    setSlotModalVisible(true);
   };
 
   const handleSubscribe = async () => {
@@ -303,6 +332,9 @@ const GymDetailScreen = ({ route, navigation }) => {
       .find(x => x.v === visitSlot.duration)?.l || `${visitSlot.duration / 60}h`
     : '';
 
+  const isSlotTomorrow = visitSlot?.date && visitSlot.date > todayStr;
+  const viewingDayLabel = viewingDate === tomorrowStr ? 'demain' : "aujourd'hui";
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Image source={{ uri: gym.image }} style={styles.image} />
@@ -336,7 +368,7 @@ const GymDetailScreen = ({ route, navigation }) => {
               <Text style={styles.crowdTitle}>Affluence actuelle</Text>
               <TouchableOpacity onPress={() => setSlotModalVisible(true)}>
                 <Text style={styles.slotChip}>
-                  🕐 {visitSlot.arrivalTime} · {durationLabel}
+                  📅 {isSlotTomorrow ? 'Demain' : "Aujourd'hui"} · {visitSlot.arrivalTime}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -349,7 +381,26 @@ const GymDetailScreen = ({ route, navigation }) => {
 
             {/* Forecast section */}
             <View style={styles.forecastDivider} />
-            <Text style={styles.forecastTitle}>📊 Prévision pour votre créneau</Text>
+            
+            <View style={styles.forecastHeaderRow}>
+              <Text style={styles.forecastTitle}>📊 Prévision pour {viewingDayLabel}</Text>
+              
+              {/* Day Selector Tabs */}
+              <View style={styles.dayToggle}>
+                <TouchableOpacity 
+                  onPress={() => setViewingDate(todayStr)}
+                  style={[styles.dayTab, viewingDate === todayStr && styles.dayTabActive]}
+                >
+                  <Text style={[styles.dayTabText, viewingDate === todayStr && styles.dayTabTextActive]}>Auj.</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setViewingDate(tomorrowStr)}
+                  style={[styles.dayTab, viewingDate === tomorrowStr && styles.dayTabActive]}
+                >
+                  <Text style={[styles.dayTabText, viewingDate === tomorrowStr && styles.dayTabTextActive]}>Dem.</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             {forecastInfo ? (
               <View style={styles.forecastRow}>
                 <Text style={styles.forecastEmoji}>{forecastInfo.emoji}</Text>
@@ -367,6 +418,7 @@ const GymDetailScreen = ({ route, navigation }) => {
             <CrowdChart
               plannedVisits={plannedVisits}
               openingHours={gym?.openingHours}
+              date={viewingDate}
             />
 
             {/* Reset */}
@@ -639,7 +691,39 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     fontWeight: '600',
     letterSpacing: 0.5,
-    marginBottom: 6,
+  },
+  forecastHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dayToggle: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 8,
+    padding: 2,
+  },
+  dayTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  dayTabActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  dayTabText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#7f8c8d',
+  },
+  dayTabTextActive: {
+    color: '#1a2332',
   },
   forecastRow: {
     flexDirection: 'row',

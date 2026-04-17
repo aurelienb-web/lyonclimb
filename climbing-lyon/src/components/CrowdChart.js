@@ -16,21 +16,25 @@ const CROWD_LEVELS = [
   { level: 5, label: 'Très fréquenté', color: '#e74c3c' },
 ];
 
-const CrowdChart = ({ plannedVisits, openingHours }) => {
+const CrowdChart = ({ plannedVisits, openingHours, date }) => {
   const [selectedBar, setSelectedBar] = useState(null);
   const scrollRef = useRef(null);
   const [scrollX, setScrollX] = useState(0);
 
   if (!openingHours) return null;
 
+  const targetDateStr = date || new Date().toISOString().split('T')[0];
+  const isToday = targetDateStr === new Date().toISOString().split('T')[0];
+
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const todayKey = days[new Date().getDay()];
-  const hoursString = openingHours[todayKey];
+  const dayIndex = new Date(targetDateStr).getDay();
+  const dayKey = days[dayIndex];
+  const hoursString = openingHours[dayKey];
 
   if (!hoursString || hoursString === 'Fermé') {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>La salle est fermée aujourd'hui.</Text>
+        <Text style={styles.emptyText}>La salle est fermée ce jour-là.</Text>
       </View>
     );
   }
@@ -44,7 +48,8 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
   const openMins = toMins(openStr);
   const closeMins = toMins(closeStr);
 
-  const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
 
   // Generate 30-min slots
   const slots = [];
@@ -60,7 +65,7 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
       return mins < vEnd && vStart < mins + 30;
     });
 
-    const isPast = mins + 30 <= nowMins;
+    const isPast = isToday && (mins + 30 <= nowMins);
 
     const count = overlapping.length;
     let level = 1;

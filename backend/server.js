@@ -52,10 +52,16 @@ function cleanUpOldData() {
     changes = true;
   }
 
-  // 3. Clean planned visits (> 24h)
+  // 3. Clean planned visits (remove if visitDate is before today)
   if (!data.plannedVisits) data.plannedVisits = [];
   const initialSlotCount = data.plannedVisits.length;
-  data.plannedVisits = data.plannedVisits.filter(v => new Date(v.createdAt) > twentyFourHoursAgo);
+  const todayStr = now.toISOString().split('T')[0];
+  
+  data.plannedVisits = data.plannedVisits.filter(v => {
+    // If no visitDate, fallback to createdAt (existing data)
+    const vDate = v.visitDate || v.createdAt.split('T')[0];
+    return vDate >= todayStr;
+  });
   if (data.plannedVisits.length !== initialSlotCount) {
     console.log(`✅ Supprimé ${initialSlotCount - data.plannedVisits.length} créneaux planifiés obsolètes.`);
     changes = true;
@@ -313,7 +319,7 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
 // Register a planned visit slot
 app.post('/api/gyms/:id/slots', (req, res) => {
-  const { userId, arrivalTime, duration } = req.body;
+  const { userId, arrivalTime, duration, visitDate } = req.body;
   if (!userId || !arrivalTime || !duration) {
     return res.status(400).json({ error: 'userId, arrivalTime et duration requis' });
   }
@@ -321,8 +327,10 @@ app.post('/api/gyms/:id/slots', (req, res) => {
   const data = readData();
   if (!data.plannedVisits) data.plannedVisits = [];
 
-  // Remove previous slot for this user/gym if exists (latest intention only)
-  data.plannedVisits = data.plannedVisits.filter(v => !(v.userId === userId && v.gymId === req.params.id));
+  const targetDate = visitDate || new Date().toISOString().split('T')[0];
+
+  // Remove previous slot for this user/gym/date if exists (latest intention only)
+  data.plannedVisits = data.plannedVisits.filter(v => !(v.userId === userId && v.gymId === req.params.id && v.visitDate === targetDate));
 
   const visit = {
     id: uuidv4(),
@@ -330,6 +338,7 @@ app.post('/api/gyms/:id/slots', (req, res) => {
     userId,
     arrivalTime,
     duration,
+    visitDate: targetDate,
     createdAt: new Date().toISOString()
   };
 
@@ -341,6 +350,7 @@ app.post('/api/gyms/:id/slots', (req, res) => {
 
 // GET crowd history for a gym (last 7 days) — used for crowd forecast
 app.get('/api/gyms/:id/crowd-history', (req, res) => {
+  const { date } = req.query;
   const data = readData();
   const gym = data.gyms.find(g => g.id === req.params.id);
 
@@ -349,20 +359,21 @@ app.get('/api/gyms/:id/crowd-history', (req, res) => {
   }
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const targetDateStr = date || new Date().toISOString().split('T')[0];
 
   const updates = data.crowdUpdates.filter(u =>
     u.gymId === req.params.id &&
     new Date(u.timestamp) > sevenDaysAgo
   );
 
-  const currentSlots = (data.plannedVisits || []).filter(v => 
+  const filteredSlots = (data.plannedVisits || []).filter(v => 
     v.gymId === req.params.id &&
-    new Date(v.createdAt).toDateString() === new Date().toDateString()
+    (v.visitDate === targetDateStr || (!v.visitDate && v.createdAt.split('T')[0] === targetDateStr))
   );
 
   res.json({
     updates,
-    plannedVisits: currentSlots
+    plannedVisits: filteredSlots
   });
 });
 

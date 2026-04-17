@@ -30,7 +30,7 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 5
+      "crowdLevel": 3
     },
     {
       "id": "2",
@@ -231,276 +231,147 @@
   ],
   "subscriptions": [
     {
-      "id": "bf54ebaf-9443-403e-8687-df239635200c",
-      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
-      "gymId": "1",
-      "pushToken": null,
-      "createdAt": "2026-02-26T21:05:01.836Z"
-    },
-    {
       "id": "942fc5f9-2f98-4218-b9e5-8d1b66fea82c",
       "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
       "gymId": "2",
       "pushToken": null,
       "createdAt": "2026-03-15T21:23:10.188Z"
+    },
+    {
+      "id": "e6f25e96-7d13-461c-8a6b-f1dd8356d9c6",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "gymId": "1",
+      "createdAt": "2026-04-16T21:32:42.317Z"
     }
   ],
   "notifications": [],
   "crowdUpdates": [
     {
-      "id": "6d95fe50-f7ae-48de-8d2e-e9849224d6eb",
+      "id": "627789d4-e022-4389-983d-a23b663d836e",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 3,
-      "timestamp": "2026-04-15T10:22:21.620Z"
-    },
-    {
-      "id": "588b1d7e-49c2-4516-a4ab-29a2e15919b7",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
       "crowdLevel": 5,
-      "timestamp": "2026-04-15T10:22:22.556Z"
+      "timestamp": "2026-04-16T21:14:50.105Z"
     },
     {
-      "id": "93083475-28c7-4cf2-b74f-12d55ca7edf9",
+      "id": "92ab74d3-13d2-4a69-a171-18da76087c40",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
       "crowdLevel": 4,
-      "timestamp": "2026-04-15T12:41:33.016Z"
+      "timestamp": "2026-04-16T21:14:52.726Z"
     },
     {
-      "id": "2796a051-c033-4d43-97e3-807b560ab5dd",
+      "id": "fb599527-a648-450d-9e67-82900b311e95",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
       "crowdLevel": 3,
-      "timestamp": "2026-04-15T12:47:59.931Z"
+      "timestamp": "2026-04-16T21:14:53.523Z"
     },
     {
-      "id": "50575bce-337b-4d08-be35-46d3bd8a52ea",
+      "id": "0e49feec-3875-4ba4-a2f9-5aff776eae86",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 5,
-      "timestamp": "2026-04-15T12:48:01.866Z"
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-16T21:14:54.059Z"
     },
     {
-      "id": "7762d860-0439-4c4c-99c2-4831721d9032",
+      "id": "de70e2c0-65d5-4e01-889a-fe4d092d6302",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
       "crowdLevel": 4,
-      "timestamp": "2026-04-15T12:48:02.938Z"
+      "timestamp": "2026-04-16T21:14:54.651Z"
     },
     {
-      "id": "5d59d598-7abd-4f1d-ad74-a0a9a8f38e2d",
+      "id": "a88953c3-2665-43ae-bdd9-d2704c4038be",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 3,
-      "timestamp": "2026-04-15T12:48:03.672Z"
-    },
-    {
-      "id": "a045ef3e-c965-45f7-8863-703897b214d3",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
       "crowdLevel": 2,
-      "timestamp": "2026-04-15T12:48:10.293Z"
+      "timestamp": "2026-04-16T21:35:42.043Z"
     },
     {
-      "id": "e238b7d5-8e41-4601-880f-5891735b9366",
+      "id": "6f36340d-601e-48b6-a31b-29b6bce7cc89",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
       "crowdLevel": 3,
-      "timestamp": "2026-04-15T13:27:36.117Z"
+      "timestamp": "2026-04-16T21:35:45.420Z"
     },
     {
-      "id": "4808e2b2-15c6-4faf-bb85-71a23d3c92eb",
+      "id": "826f45df-51e0-4ec1-9990-1c347248f263",
       "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "crowdLevel": 5,
-      "timestamp": "2026-04-15T14:17:00.104Z"
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 2,
+      "timestamp": "2026-04-16T21:35:45.944Z"
     },
     {
-      "id": "8a213b1f-dad0-4dfc-a5a2-556db9460c77",
+      "id": "2e60c675-7988-46d9-b9c7-f986f1920ff5",
       "gymId": "1",
-      "userId": "dev_mnyo5yei_zp9s0k8n",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-16T21:35:46.643Z"
+    },
+    {
+      "id": "95e400bf-c2b9-40cb-a127-a32b92881be5",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
       "crowdLevel": 5,
-      "timestamp": "2026-04-15T21:20:12.465Z"
+      "timestamp": "2026-04-16T21:35:50.758Z"
+    },
+    {
+      "id": "aa320687-4256-4724-be1b-ef5933a3a328",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-16T21:35:55.786Z"
+    },
+    {
+      "id": "1bff22dd-8017-4470-82ee-a08e3086c165",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-16T21:36:00.480Z"
+    },
+    {
+      "id": "5ddde1a3-196d-415b-8379-12e43df6e850",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 5,
+      "timestamp": "2026-04-16T21:36:04.647Z"
+    },
+    {
+      "id": "bfbfb0bf-bc02-4236-ae83-f0f0956d53e8",
+      "gymId": "1",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "crowdLevel": 1,
+      "timestamp": "2026-04-16T21:36:06.430Z"
     }
   ],
   "plannedVisits": [
     {
-      "id": "c7f1b17c-e7f5-49ab-8aa5-0f1ff2cb80fa",
+      "id": "4d4ac675-fb4a-411b-873f-ab13d0aed3ee",
       "gymId": "1",
-      "userId": "simu_user_1",
-      "arrivalTime": "18:00",
+      "userId": "eef2301a-4218-4d06-b25a-fbf6493f5133",
+      "arrivalTime": "11:11",
       "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.932Z"
+      "visitDate": "2026-04-17",
+      "createdAt": "2026-04-17T08:49:09.935Z"
     },
     {
-      "id": "e6e71884-a62a-43ed-ab2e-522225b1df2e",
-      "gymId": "1",
-      "userId": "simu_user_2",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.941Z"
-    },
-    {
-      "id": "b836999c-1906-47ba-82cb-990c455e128a",
-      "gymId": "1",
-      "userId": "simu_user_3",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.944Z"
-    },
-    {
-      "id": "25758fa9-77ca-443f-a582-9f187f6fbe27",
-      "gymId": "1",
-      "userId": "simu_user_4",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.947Z"
-    },
-    {
-      "id": "d274f529-afc5-43cd-837e-61b01a205d72",
-      "gymId": "1",
-      "userId": "simu_user_5",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.950Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_6",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "5aa77a4e-f072-4677-8014-399521948638",
-      "gymId": "1",
-      "userId": "dev_mnye3wrl_632ab36c",
-      "arrivalTime": "15:13",
+      "id": "baee5ee5-b44b-41d3-9efe-7a610a6ddb29",
+      "gymId": "2",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "arrivalTime": "11:20",
       "duration": 90,
-      "createdAt": "2026-04-15T13:13:39.200Z"
+      "visitDate": "2026-04-17",
+      "createdAt": "2026-04-17T09:16:08.676Z"
     },
     {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
+      "id": "4a26a032-5f44-40f7-bb08-c9f61fe81f75",
       "gymId": "1",
-      "userId": "simu_user_7",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_8",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_9",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_10",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_11",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_12",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_13",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_14",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_15",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_16",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_17",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_18",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_19",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "f153fe5c-9716-4cab-91d3-cd4c86bc3ba2",
-      "gymId": "1",
-      "userId": "simu_user_20",
-      "arrivalTime": "18:00",
-      "duration": 120,
-      "createdAt": "2026-04-15T12:52:52.953Z"
-    },
-    {
-      "id": "c3c500ff-ecf4-4593-9eef-b14f5e85d127",
-      "gymId": "1",
-      "userId": "dev_mnyo5yei_zp9s0k8n",
-      "arrivalTime": "10:00",
+      "userId": "a00dc823-8562-4131-9701-9a8d67b182d8",
+      "arrivalTime": "11:30",
       "duration": 90,
-      "createdAt": "2026-04-15T21:16:28.501Z"
+      "visitDate": "2026-04-17",
+      "createdAt": "2026-04-17T09:22:33.077Z"
     }
   ]
 }

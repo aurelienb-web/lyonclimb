@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,16 @@ import {
   TextInput,
   ScrollView,
   Platform,
+  Keyboard,
+  Animated,
+  PanResponder,
+  KeyboardAvoidingView,
+  Pressable,
+  Dimensions,
+  TouchableWithoutFeedback,
 } from 'react-native';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const DURATIONS = [
   { label: '1h', value: 60 },
@@ -23,9 +32,105 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
   const defaultHour = String(now.getHours()).padStart(2, '0');
   const defaultMin = String(now.getMinutes()).padStart(2, '0');
 
+  const todayStr = now.toISOString().split('T')[0];
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  const [selectedDay, setSelectedDay] = useState(todayStr);
   const [time, setTime] = useState(`${defaultHour}:${defaultMin}`);
   const [timeError, setTimeError] = useState('');
   const [selectedDuration, setSelectedDuration] = useState(90);
+
+  // Animation
+  const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      translateY.setValue(SCREEN_HEIGHT);
+      backdropOpacity.setValue(0);
+      Animated.parallel([
+        Animated.spring(translateY, {
+          toValue: 0,
+          useNativeDriver: true,
+          damping: 20,
+          stiffness: 200,
+        }),
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
+  const animateClose = () => {
+    Keyboard.dismiss();
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: SCREEN_HEIGHT,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onClose();
+    });
+  };
+
+  // PanResponder — attached ONLY to the drag handle area
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          translateY.setValue(gestureState.dy);
+          // Fade backdrop as user drags
+          const opacity = Math.max(0, 1 - gestureState.dy / 400);
+          backdropOpacity.setValue(opacity);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 100 || gestureState.vy > 0.5) {
+          // Close if dragged enough or fast enough
+          Animated.parallel([
+            Animated.timing(translateY, {
+              toValue: SCREEN_HEIGHT,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+            Animated.timing(backdropOpacity, {
+              toValue: 0,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+          ]).start(() => {
+            onClose();
+          });
+        } else {
+          // Spring back
+          Animated.parallel([
+            Animated.spring(translateY, {
+              toValue: 0,
+              useNativeDriver: true,
+            }),
+            Animated.timing(backdropOpacity, {
+              toValue: 1,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }
+      },
+    })
+  ).current;
 
   const validateTime = (val) => {
     const regex = /^([01]?\d|2[0-3]):([0-5]\d)$/;
@@ -57,6 +162,7 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
   };
 
   const handleConfirm = () => {
+    Keyboard.dismiss();
     if (!validateTime(time)) {
       setTimeError('Format invalide (HH:MM)');
       return;
@@ -65,11 +171,12 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
     // Validation des horaires d'ouverture
     if (openingHours) {
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-      const todayKey = days[new Date().getDay()];
-      const hoursString = openingHours[todayKey];
+      const targetDate = new Date(selectedDay);
+      const dayKey = days[targetDate.getDay()];
+      const hoursString = openingHours[dayKey];
 
       if (!hoursString || hoursString === 'Fermé') {
-        setTimeError('La salle est fermée aujourd\'hui.');
+        setTimeError(`La salle est fermée ${selectedDay === todayStr ? "aujourd'hui" : "demain"}.`);
         return;
       }
 
@@ -96,72 +203,128 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
       }
     }
 
-    onConfirm({ arrivalTime: time, duration: selectedDuration });
+    onConfirm({ arrivalTime: time, duration: selectedDuration, date: selectedDay });
   };
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          {/* Handle bar */}
-          <View style={styles.handle} />
+        {/* Backdrop — back to standard touchable (will require 2 taps if keyboard is open) */}
+        <TouchableWithoutFeedback onPress={() => {
+          Keyboard.dismiss();
+          onClose();
+        }}>
+          <View style={StyleSheet.absoluteFill} />
+        </TouchableWithoutFeedback>
 
-          <Text style={styles.title}>🗓️ Planifiez votre visite</Text>
-          <Text style={styles.subtitle}>
-            Pour voir l'affluence et obtenir une prévision personnalisée
-          </Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1, justifyContent: 'flex-end', width: '100%' }}
+          pointerEvents="box-none"
+        >
+          <Animated.View
+            style={[
+              styles.sheet,
+              { transform: [{ translateY }] },
+            ]}
+          >
+            {/* ── Drag Handle Zone ── */}
+            <View {...panResponder.panHandlers} style={styles.dragZone}>
+              <View style={styles.handle} />
+            </View>
 
-          {/* Arrival time */}
-          <Text style={styles.label}>⏰ À quelle heure comptez-vous arriver ?</Text>
-          <TextInput
-            style={[styles.input, timeError ? styles.inputError : null]}
-            value={time}
-            onChangeText={handleTimeChange}
-            placeholder="HH:MM"
-            keyboardType="numbers-and-punctuation"
-            maxLength={5}
-            placeholderTextColor="#b0bec5"
-          />
-          {timeError ? <Text style={styles.errorText}>{timeError}</Text> : null}
+            <Text style={styles.title}>🗓️ Planifiez votre visite</Text>
+            <Text style={styles.subtitle}>
+              Pour voir l'affluence et obtenir une prévision personnalisée
+            </Text>
 
-          {/* Duration */}
-          <Text style={styles.label}>⏱️ Pour combien de temps ?</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.durationRow}>
-            {DURATIONS.map((d) => (
+            {/* Day selection */}
+            <Text style={styles.label}>📅 Quel jour ?</Text>
+            <View style={styles.daySelector}>
               <TouchableOpacity
-                key={d.value}
-                style={[
-                  styles.durationChip,
-                  selectedDuration === d.value && styles.durationChipActive,
-                ]}
-                onPress={() => setSelectedDuration(d.value)}
+                style={[styles.dayButton, selectedDay === todayStr && styles.dayButtonActive]}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setSelectedDay(todayStr);
+                }}
               >
-                <Text
-                  style={[
-                    styles.durationText,
-                    selectedDuration === d.value && styles.durationTextActive,
-                  ]}
-                >
-                  {d.label}
+                <Text style={[styles.dayButtonText, selectedDay === todayStr && styles.dayButtonTextActive]}>
+                  Aujourd'hui
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+              <TouchableOpacity
+                style={[styles.dayButton, selectedDay === tomorrowStr && styles.dayButtonActive]}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setSelectedDay(tomorrowStr);
+                }}
+              >
+                <Text style={[styles.dayButtonText, selectedDay === tomorrowStr && styles.dayButtonTextActive]}>
+                  Demain
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          {/* Actions */}
-          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-            <Text style={styles.confirmText}>🔓 Voir l'affluence</Text>
-          </TouchableOpacity>
+            {/* Arrival time */}
+            <Text style={styles.label}>⏰ À quelle heure comptez-vous arriver ?</Text>
+            <TextInput
+              style={[styles.input, timeError ? styles.inputError : null]}
+              value={time}
+              onChangeText={handleTimeChange}
+              placeholder="HH:MM"
+              keyboardType="numeric"
+              maxLength={5}
+              placeholderTextColor="#b0bec5"
+            />
+            {timeError ? <Text style={styles.errorText}>{timeError}</Text> : null}
 
-          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelText}>Annuler</Text>
-          </TouchableOpacity>
-        </View>
+            {/* Duration */}
+            <Text style={styles.label}>⏱️ Pour combien de temps ?</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.durationRow}
+              keyboardShouldPersistTaps="handled"
+            >
+              {DURATIONS.map((d) => (
+                <TouchableOpacity
+                  key={d.value}
+                  style={[
+                    styles.durationChip,
+                    selectedDuration === d.value && styles.durationChipActive,
+                  ]}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    setSelectedDuration(d.value);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.durationText,
+                      selectedDuration === d.value && styles.durationTextActive,
+                    ]}
+                  >
+                    {d.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            {/* Actions */}
+            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+              <Text style={styles.confirmText}>🔓 Voir l'affluence</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelButton} onPress={animateClose}>
+              <Text style={styles.cancelText}>Annuler</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );
@@ -177,16 +340,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 24,
+    paddingHorizontal: 24,
     paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+  },
+  dragZone: {
+    paddingTop: 12,
+    paddingBottom: 8,
+    alignItems: 'center',
+    // Larger hit area for easier grabbing
+    marginHorizontal: -24,
+    paddingHorizontal: 24,
   },
   handle: {
     width: 40,
     height: 4,
     backgroundColor: '#dde1e7',
     borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
   },
   title: {
     fontSize: 20,
@@ -207,6 +376,32 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2c3e50',
     marginBottom: 10,
+  },
+  daySelector: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    gap: 10,
+  },
+  dayButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#dde1e7',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  dayButtonActive: {
+    backgroundColor: '#3498db',
+    borderColor: '#3498db',
+  },
+  dayButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#7f8c8d',
+  },
+  dayButtonTextActive: {
+    color: '#fff',
   },
   input: {
     borderWidth: 1.5,

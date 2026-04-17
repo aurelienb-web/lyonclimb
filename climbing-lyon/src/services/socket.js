@@ -1,11 +1,12 @@
 import { io } from 'socket.io-client';
 
 // On utilise la même IP que l'API mais sans le suffixe /api
-const SOCKET_URL = 'http://192.168.1.20:12000';
 //const SOCKET_URL = 'http://192.168.1.20:12000';
+const SOCKET_URL = 'http://192.168.0.154:12000';
+//const SOCKET_URL = 'http://localhost:12000'; // Pour le test sur simulateur iOS ou Web local
 
 const socket = io(SOCKET_URL, {
-  transports: ['websocket'],
+  transports: ['websocket', 'polling'], // Ajout de polling pour plus de compatibilité
   autoConnect: true,
 });
 
