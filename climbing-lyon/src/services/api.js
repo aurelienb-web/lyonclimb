@@ -1,9 +1,6 @@
 import axios from 'axios';
 
-// const API_BASE_URL = 'https://work-1-qvlwqbjsnisnedpv.prod-runtime.all-hands.dev/api';
-//const API_BASE_URL = 'http://192.168.1.20:12000/api';
-const API_BASE_URL = 'http://192.168.0.154:12000/api';
-//const API_BASE_URL = 'http://localhost:12000/api'; // Pour le test sur simulateur iOS ou Web local
+const API_BASE_URL = 'https://lyonclimb.onrender.com/api';
 
 
 const api = axios.create({
