@@ -114,12 +114,11 @@ const CrowdChart = ({ plannedVisits, openingHours, date }) => {
               const height = 45 + (slot.level * 8);
 
               return (
-                <View key={index} style={styles.barWrapper}>
+                <View key={index} style={[styles.barWrapper, isSelected && { zIndex: 999 }]}>
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => setSelectedBar(isSelected ? null : index)}
-                    onMouseEnter={() => setSelectedBar(index)}
-                    onMouseLeave={() => setSelectedBar(null)}
+                    hitSlop={{ top: 10, bottom: 25, left: 5, right: 5 }}
                     style={[
                       styles.bar,
                       {
@@ -162,8 +161,8 @@ const CrowdChart = ({ plannedVisits, openingHours, date }) => {
                   )}
                   
                   {isSelected && (
-                    <View style={styles.tooltip}>
-                      <Text style={styles.tooltipText}>
+                    <View style={styles.tooltip} pointerEvents="none">
+                      <Text style={styles.tooltipText} numberOfLines={1}>
                         {CROWD_LEVELS.find(cl => cl.level === slot.level)?.label}
                       </Text>
                     </View>
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
   chartArea: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 145, // Augmenté pour barres plus grandes + tooltips
+    height: 160, // Hauteur optimale pour barres max + bulles compactes
     paddingBottom: 25,
     paddingHorizontal: 45, // Augmenté pour que les infobulles aux extrémités soient visibles
   },
@@ -240,20 +239,19 @@ const styles = StyleSheet.create({
   },
   tooltip: {
     position: 'absolute',
-    top: -25,
+    top: -32, // Un peu plus proche encore (32px au lieu de 35px)
     backgroundColor: '#1a2332',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     zIndex: 100,
     alignItems: 'center',
-    // On enlève minWidth pour que ça s'adapte au texte (ex: "Très fréquenté")
+    justifyContent: 'center',
   },
   tooltipText: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    whiteSpace: 'nowrap',
   },
   emptyContainer: {
     padding: 20,

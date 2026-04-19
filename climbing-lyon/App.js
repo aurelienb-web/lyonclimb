@@ -65,13 +65,13 @@ const MainTabs = () => (
         borderTopWidth: 1,
         borderTopColor: '#ecf0f1',
         paddingTop: 8,
-        paddingBottom: 8,
-        height: 70,
+        paddingBottom: 24,
+        height: 85,
       },
       tabBarLabelStyle: {
         fontSize: 12,
         fontWeight: '600',
-        marginTop: 4,
+        marginTop: 0,
       },
       headerShown: false,
     })}
