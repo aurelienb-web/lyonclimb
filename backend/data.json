@@ -14,7 +14,7 @@
         "thursday": "10:00-23:00",
         "friday": "10:00-23:00",
         "saturday": "09:00-20:00",
-        "sunday": "09:00-20:00"
+        "sunday": "09:00-22:30"
       },
       "pricing": {
         "singleEntry": "16€",
@@ -109,7 +109,7 @@
         "thursday": "12:00-22:30",
         "friday": "12:00-22:30",
         "saturday": "10:00-19:30",
-        "sunday": "10:00-19:30"
+        "sunday": "10:00-22:30"
       },
       "pricing": {
         "singleEntry": "14€",

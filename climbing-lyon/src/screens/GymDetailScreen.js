@@ -532,14 +532,23 @@ const GymDetailScreen = ({ route, navigation }) => {
         {/* Opening hours */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🕐 Horaires</Text>
-          {Object.entries(gym.openingHours).map(([day, hours]) => (
-            <View key={day} style={styles.scheduleRow}>
-              <Text style={styles.dayText}>
-                {day.charAt(0).toUpperCase() + day.slice(1)}
-              </Text>
-              <Text style={styles.hoursText}>{hours}</Text>
-            </View>
-          ))}
+          {(() => {
+            const dayNames = {
+              monday: 'Lundi',
+              tuesday: 'Mardi',
+              wednesday: 'Mercredi',
+              thursday: 'Jeudi',
+              friday: 'Vendredi',
+              saturday: 'Samedi',
+              sunday: 'Dimanche'
+            };
+            return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
+              <View key={day} style={styles.scheduleRow}>
+                <Text style={styles.dayText}>{dayNames[day]}</Text>
+                <Text style={styles.hoursText}>{gym.openingHours[day] || 'Fermé'}</Text>
+              </View>
+            ));
+          })()}
         </View>
 
         {/* Features */}

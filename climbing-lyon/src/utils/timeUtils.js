@@ -33,7 +33,8 @@ export const getGymStatus = (openingHours) => {
   }
   
   if (nowTotal < openTotal) {
-    return { status: 'OPENING_SOON', label: 'Ouvre bientôt', color: '#3498db' };
+    const diff = openTotal - nowTotal;
+    return { status: 'OPENING_SOON', label: `Ouvre dans ${diff} min`, color: '#3498db' };
   }
 
   if (nowTotal < closeTotal - SOON_THRESHOLD) {
@@ -41,7 +42,8 @@ export const getGymStatus = (openingHours) => {
   }
 
   if (nowTotal < closeTotal) {
-    return { status: 'CLOSING_SOON', label: 'Ferme bientôt', color: '#f39c12' };
+    const diff = closeTotal - nowTotal;
+    return { status: 'CLOSING_SOON', label: `Ferme dans ${diff} min`, color: '#f39c12' };
   }
 
   return { status: 'CLOSED', label: 'Fermé', color: '#e74c3c' };
