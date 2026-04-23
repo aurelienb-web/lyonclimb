@@ -28,6 +28,7 @@ import {
 import { subscribeToCrowdUpdates } from '../services/socketService';
 
 const CROWD_LEVELS = [
+  { level: 0, label: 'Aucune donnée pour le moment', color: '#bdc3c7', emoji: '⚪' },
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
   { level: 2, label: 'Peu fréquenté', color: '#2ecc71', emoji: '🟢' },
   { level: 3, label: 'Modéré', color: '#f39c12', emoji: '🟡' },
@@ -327,9 +328,9 @@ const GymDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  const crowdInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(gym.crowdLevel)) || CROWD_LEVELS[2];
+  const crowdInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(gym.crowdLevel)) || CROWD_LEVELS.find(c => c.level === 0);
   const forecastInfo = forecastLevel
-    ? CROWD_LEVELS.find(c => c.level === forecastLevel) || CROWD_LEVELS[2]
+    ? CROWD_LEVELS.find(c => c.level === forecastLevel) || CROWD_LEVELS.find(c => c.level === 3)
     : null;
 
   const durationLabel = visitSlot

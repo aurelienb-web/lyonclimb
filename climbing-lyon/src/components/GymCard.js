@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { getGymStatus } from '../utils/timeUtils';
 
 const CROWD_LEVELS = [
+  { level: 0, label: 'Aucune donnée pour le moment', color: '#bdc3c7', emoji: '⚪' },
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
   { level: 2, label: 'Peu fréquenté', color: '#2ecc71', emoji: '🟢' },
   { level: 3, label: 'Modéré', color: '#f39c12', emoji: '🟡' },
@@ -11,7 +12,7 @@ const CROWD_LEVELS = [
 ];
 
 const GymCard = ({ gym, onPress }) => {
-  const crowdInfo = CROWD_LEVELS.find(c => c.level === gym.crowdLevel) || CROWD_LEVELS[2];
+  const crowdInfo = CROWD_LEVELS.find(c => c.level === gym.crowdLevel) || CROWD_LEVELS[0];
   const status = getGymStatus(gym.openingHours);
 
   return (

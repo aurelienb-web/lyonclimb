@@ -64,9 +64,9 @@ app.get('/api/gyms', async (req, res) => {
 
       const votes = Object.values(latestVotesPerUser);
       const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
-      return { ...gym, crowdLevel: Math.round(sum / votes.length) };
+      return { ...gym, crowdLevel: Math.round(sum / votes.length), crowdUpdatesCount: votes.length };
     }
-    return gym;
+    return { ...gym, crowdLevel: 0, crowdUpdatesCount: 0 };
   });
 
   res.json(updatedGyms);
@@ -104,6 +104,9 @@ app.get('/api/gyms/:id', async (req, res) => {
     const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
     crowdLevel = Math.round(sum / votes.length);
     crowdUpdatesCount = votes.length;
+  } else {
+    crowdLevel = 0;
+    crowdUpdatesCount = 0;
   }
 
   // Get user's last contribution
