@@ -28,7 +28,7 @@ import {
 import { subscribeToCrowdUpdates } from '../services/socketService';
 
 const CROWD_LEVELS = [
-  { level: 0, label: 'Aucune donnée pour le moment', color: '#bdc3c7', emoji: '⚪' },
+  { level: 0, label: 'Aucune donnée pour le moment', color: '#6b7475ff', emoji: '⚪' },
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
   { level: 2, label: 'Peu fréquenté', color: '#2ecc71', emoji: '🟢' },
   { level: 3, label: 'Modéré', color: '#f39c12', emoji: '🟡' },
@@ -133,7 +133,7 @@ const GymDetailScreen = ({ route, navigation }) => {
         const saved = JSON.parse(raw);
         const slotDate = saved.slot.date || saved.savedAt.split('T')[0];
         const todayStr = new Date().toISOString().split('T')[0];
-        
+
         // Keep if it's today or in the future
         if (slotDate >= todayStr) {
           setVisitSlot(saved.slot);
@@ -207,10 +207,10 @@ const GymDetailScreen = ({ route, navigation }) => {
   useEffect(() => {
     const unsubscribe = subscribeToCrowdUpdates((data) => {
       if (data.gymId === gymId) {
-        setGym(prev => prev ? { 
-          ...prev, 
+        setGym(prev => prev ? {
+          ...prev,
           crowdLevel: data.crowdLevel,
-          crowdUpdatesCount: data.crowdUpdatesCount 
+          crowdUpdatesCount: data.crowdUpdatesCount
         } : null);
       }
     });
@@ -385,19 +385,19 @@ const GymDetailScreen = ({ route, navigation }) => {
 
             {/* Forecast section */}
             <View style={styles.forecastDivider} />
-            
+
             <View style={styles.forecastHeaderRow}>
               <Text style={styles.forecastTitle}>📊 Prévision pour {viewingDayLabel}</Text>
-              
+
               {/* Day Selector Tabs */}
               <View style={styles.dayToggle}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setViewingDate(todayStr)}
                   style={[styles.dayTab, viewingDate === todayStr && styles.dayTabActive]}
                 >
                   <Text style={[styles.dayTabText, viewingDate === todayStr && styles.dayTabTextActive]}>Auj.</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setViewingDate(tomorrowStr)}
                   style={[styles.dayTab, viewingDate === tomorrowStr && styles.dayTabActive]}
                 >
@@ -490,8 +490,6 @@ const GymDetailScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        <Text style={styles.description}>{gym.description}</Text>
-
         {/* Contact */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact</Text>
@@ -502,30 +500,14 @@ const GymDetailScreen = ({ route, navigation }) => {
             <Text style={styles.link}>🌐 Site web</Text>
           </TouchableOpacity>
         </View>
-
+        
         {/* Pricing */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>💰 Tarifs</Text>
           <View style={styles.pricingGrid}>
             <View style={styles.priceItem}>
               <Text style={styles.priceLabel}>Entrée unique</Text>
-              <Text style={styles.priceValue}>{gym.pricing.singleEntry}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Carte 10 séances</Text>
-              <Text style={styles.priceValue}>{gym.pricing.tenSessions}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Abonnement mensuel</Text>
-              <Text style={styles.priceValue}>{gym.pricing.monthlyUnlimited}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Abonnement annuel</Text>
-              <Text style={styles.priceValue}>{gym.pricing.yearlySubscription}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Location matériel</Text>
-              <Text style={styles.priceValue}>{gym.pricing.equipmentRental}</Text>
+              <Text style={styles.priceValue}>{gym.pricing.single} €</Text>
             </View>
           </View>
         </View>
@@ -552,17 +534,19 @@ const GymDetailScreen = ({ route, navigation }) => {
           })()}
         </View>
 
-        {/* Features */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>✨ Équipements</Text>
-          <View style={styles.featuresContainer}>
-            {gym.features.map((feature, index) => (
-              <View key={index} style={styles.featureTag}>
-                <Text style={styles.featureText}>{feature}</Text>
-              </View>
-            ))}
+        {/* Features - kept for future use */}
+        {gym.features && gym.features.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>✨ Équipements</Text>
+            <View style={styles.featuresContainer}>
+              {gym.features.map((feature, index) => (
+                <View key={index} style={styles.featureTag}>
+                  <Text style={styles.featureText}>{feature}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
       </View>
 
       {/* Visit slot modal */}

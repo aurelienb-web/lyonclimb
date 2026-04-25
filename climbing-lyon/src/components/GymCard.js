@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { getGymStatus } from '../utils/timeUtils';
 
 const CROWD_LEVELS = [
-  { level: 0, label: 'Aucune donnée pour le moment', color: '#bdc3c7', emoji: '⚪' },
+  { level: 0, label: 'Aucune donnée pour le moment', color: '#6b7475ff', emoji: '⚪' },
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
   { level: 2, label: 'Peu fréquenté', color: '#2ecc71', emoji: '🟢' },
   { level: 3, label: 'Modéré', color: '#f39c12', emoji: '🟡' },
@@ -18,8 +18,8 @@ const GymCard = ({ gym, onPress }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: gym.image }} 
+        <Image
+          source={{ uri: gym.image }}
           style={styles.image}
           defaultSource={require('../../assets/placeholder.png')}
         />
@@ -30,13 +30,13 @@ const GymCard = ({ gym, onPress }) => {
       <View style={styles.content}>
         <Text style={styles.name}>{gym.name}</Text>
         <Text style={styles.address} numberOfLines={1}>{gym.address}</Text>
-        
+
         <View style={styles.footer}>
           <View style={styles.priceContainer}>
             <Text style={styles.priceLabel}>Entrée</Text>
-            <Text style={styles.price}>{gym.pricing.singleEntry}</Text>
+            <Text style={styles.price}>{gym.pricing.single}€</Text>
           </View>
-          
+
           <View style={[styles.crowdContainer, { backgroundColor: crowdInfo.color + '20' }]}>
             <Text style={styles.crowdEmoji}>{crowdInfo.emoji}</Text>
             <Text style={[styles.crowdText, { color: crowdInfo.color }]}>
@@ -45,13 +45,15 @@ const GymCard = ({ gym, onPress }) => {
           </View>
         </View>
 
-        <View style={styles.features}>
-          {gym.features.slice(0, 3).map((feature, index) => (
-            <View key={index} style={styles.featureTag}>
-              <Text style={styles.featureText}>{feature}</Text>
-            </View>
-          ))}
-        </View>
+        {gym.features && gym.features.length > 0 && (
+          <View style={styles.features}>
+            {gym.features.slice(0, 3).map((feature, index) => (
+              <View key={index} style={styles.featureTag}>
+                <Text style={styles.featureText}>{feature}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
