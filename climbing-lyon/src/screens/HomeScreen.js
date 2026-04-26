@@ -20,6 +20,7 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [, setTick] = useState(0); // Dummy state to trigger re-render
 
   const loadGyms = async () => {
     try {
@@ -47,6 +48,14 @@ const HomeScreen = ({ navigation }) => {
       );
     });
     return () => unsubscribe();
+  }, []);
+
+  // Update status every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick(t => t + 1);
+    }, 60000);
+    return () => clearInterval(timer);
   }, []);
 
   useFocusEffect(
