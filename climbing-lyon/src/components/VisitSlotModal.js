@@ -16,6 +16,7 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from 'react-native';
+import { parseTime } from '../utils/timeUtils';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -168,17 +169,13 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
       return;
     }
 
-    const toMins = (t) => {
-      const [h, m] = t.split(':').map(Number);
-      return h * 60 + m;
-    };
+    const startMins = parseTime(time);
 
     // Validation du créneau passé
     const nowLocal = new Date();
     const todayStrLocal = nowLocal.toISOString().split('T')[0];
     if (selectedDay === todayStrLocal) {
       const currentMins = nowLocal.getHours() * 60 + nowLocal.getMinutes();
-      const startMins = toMins(time);
       if (startMins < currentMins) {
         setTimeError("L'heure de début est déjà passée.");
         return;
@@ -191,26 +188,43 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
       const targetDate = new Date(selectedDay);
       const dayKey = days[targetDate.getDay()];
       const hoursString = openingHours[dayKey];
+      const isTodaySelected = selectedDay === todayStr;
 
-      if (!hoursString || hoursString === 'Fermé') {
-        setTimeError(`La salle est fermée ${selectedDay === todayStr ? "aujourd'hui" : "demain"}.`);
+      // Use same robust parsing as getGymStatus
+      if (!hoursString || hoursString.trim().toLowerCase() === 'fermé') {
+        setTimeError(`La salle est fermée ${isTodaySelected ? "aujourd'hui" : "demain"}.`);
         return;
       }
 
-      const [openTime, closeTime] = hoursString.split('-');
-      
-      const startMins = toMins(time);
+      const parts = hoursString.split(/[-–—à]| au /i).map(s => s.trim());
+      if (parts.length < 2) {
+        setTimeError(`La salle est fermée ${isTodaySelected ? "aujourd'hui" : "demain"}.`);
+        return;
+      }
+
+      const openMins = parseTime(parts[0]);
+      const closeMins = parseTime(parts[1]);
+
+      if (openMins === null || closeMins === null) {
+        setTimeError(`La salle est fermée ${isTodaySelected ? "aujourd'hui" : "demain"}.`);
+        return;
+      }
+
       const endMins = startMins + selectedDuration;
-      const openMins = toMins(openTime);
-      const closeMins = toMins(closeTime);
+
+      // Handle midnight wrap-around
+      let effectiveCloseMins = closeMins;
+      if (closeMins <= openMins) {
+        effectiveCloseMins += 24 * 60;
+      }
 
       if (startMins < openMins) {
-        setTimeError(`La salle n'ouvre qu'à ${openTime}.`);
+        setTimeError(`La salle n'ouvre qu'à ${parts[0]}.`);
         return;
       }
 
-      if (endMins > closeMins) {
-        setTimeError(`Le créneau dépasse la fermeture (${closeTime}).`);
+      if (endMins > effectiveCloseMins) {
+        setTimeError(`Le créneau dépasse la fermeture (${parts[1]}).`);
         return;
       }
     }

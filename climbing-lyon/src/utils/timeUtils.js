@@ -6,7 +6,7 @@
  * Helper to parse time strings like "10:00", "10h00", "10h", "9:30"
  * Returns minutes since midnight
  */
-const parseTime = (str) => {
+export const parseTime = (str) => {
   if (!str) return null;
   const clean = str.trim().toLowerCase();
   // Match "10:00" or "10h00" or "10h"

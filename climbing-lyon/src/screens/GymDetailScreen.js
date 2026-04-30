@@ -26,6 +26,7 @@ import {
   registerVisitSlot,
 } from '../services/api';
 import { subscribeToCrowdUpdates } from '../services/socketService';
+import { parseTime } from '../utils/timeUtils';
 
 const CROWD_LEVELS = [
   { level: 0, label: 'Aucune donnée pour le moment', color: '#6b7475ff', emoji: '⚪' },
@@ -50,15 +51,13 @@ const computeForecast = (plannedVisits, arrivalTime, duration) => {
   if (!plannedVisits || plannedVisits.length === 0) return 1; // Default to Très calme if empty
 
   // Parse arrival as minutes-since-midnight
-  const [h, m] = arrivalTime.split(':').map(Number);
-  const arrivalMins = h * 60 + m;
+  const arrivalMins = parseTime(arrivalTime);
   const departureMins = arrivalMins + duration;
 
   // Count how many people are there during our stay
   // A person is "there" if their window [start2, end2] overlaps with ours [start, end]
   const overlapping = plannedVisits.filter((v) => {
-    const [h2, m2] = v.arrivalTime.split(':').map(Number);
-    const start2 = h2 * 60 + m2;
+    const start2 = parseTime(v.arrivalTime);
     const end2 = start2 + v.duration;
 
     // Overlap condition: start1 < end2 AND start2 < end1
