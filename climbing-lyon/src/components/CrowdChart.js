@@ -177,25 +177,26 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10, // Réduit
+    marginTop: 5,
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 8, // Réduit
+    borderRadius: 12,
+    padding: 0, // Suppression du padding global pour réduire le "rebord"
     borderWidth: 1,
-    borderColor: '#eee',
-    paddingBottom: 30, // Pour les labels décalés
+    borderColor: '#f0f0f0',
   },
   chartWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
   },
   arrowButton: {
-    padding: 10,
+    padding: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 20,
   },
   arrowText: {
-    fontSize: 30,
+    fontSize: 24,
     color: '#bdc3c7',
     fontWeight: '300',
   },
@@ -205,9 +206,9 @@ const styles = StyleSheet.create({
   chartArea: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 145, // Augmenté pour barres plus grandes + tooltips
-    paddingBottom: 25,
-    paddingHorizontal: 10,
+    height: 155, // Légèrement augmenté pour laisser de la place aux labels et tooltips
+    paddingBottom: 45, // Augmenté pour contenir les labels à -35px
+    paddingHorizontal: 5,
   },
   barWrapper: {
     alignItems: 'center',
