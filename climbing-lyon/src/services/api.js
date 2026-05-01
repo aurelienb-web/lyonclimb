@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 //const API_BASE_URL = 'https://lyonclimb.onrender.com/api';
-const API_BASE_URL = 'http://192.168.1.11:12000/api';
+//const API_BASE_URL = 'http://192.168.1.11:12000/api';
+const API_BASE_URL = 'http://192.168.1.20:12000/api';
 
 
 const api = axios.create({

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -94,8 +95,14 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🧗 Salles d'Escalade</Text>
-        <Text style={styles.headerSubtitle}>Lyon et environs</Text>
+        <View style={styles.headerBrand}>
+          <Image 
+            source={require('../../assets/lone_logo.png')} 
+            style={styles.logo} 
+            resizeMode="contain"
+          />
+          <Text style={styles.headerTitle}>LONE</Text>
+        </View>
       </View>
 
       <FlatList
@@ -131,20 +138,26 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ecf0f1',
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#2c3e50',
+  headerBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginTop: 4,
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: 12,
+    borderRadius: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#2c3e50',
+    letterSpacing: 1,
   },
   listContent: {
     paddingVertical: 8,

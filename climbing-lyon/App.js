@@ -20,7 +20,7 @@ const TabIcon = ({ name, focused }) => {
   const icons = {
     'Salles': '🧗',
     'Mes salles': '⭐',
-    'A propos de Climbing Lyon': '👤',
+    'A propos de LONE': '👤',
   };
   
   return (
@@ -79,7 +79,7 @@ const MainTabs = () => (
     <Tab.Screen name="Salles" component={HomeStack} />
     <Tab.Screen name="Mes salles" component={SubscriptionsScreen} />
     <Tab.Screen 
-      name="A propos de Climbing Lyon" 
+      name="A propos de LONE" 
       component={ProfileScreen} 
       options={{ tabBarLabel: "L'app" }}
     />

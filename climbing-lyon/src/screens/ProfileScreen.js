@@ -27,12 +27,12 @@ const ProfileScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>📱 A propos de Climbing Lyon</Text>
+          <Text style={styles.sectionTitle}>📱 A propos de LONE</Text>
 
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>🧗 Salles d'Escalade Lyon</Text>
+            <Text style={styles.infoTitle}>🧗 Salles d'Escalade</Text>
             <Text style={styles.infoText}>
-              Cette application vous permet de découvrir les salles d'escalade de Lyon et ses environs.
+              LONE vous permet de découvrir les salles d'escalade et de suivre leur affluence en temps réel.
             </Text>
           </View>
 
