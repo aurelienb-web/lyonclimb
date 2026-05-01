@@ -26,8 +26,10 @@ import {
   registerVisitSlot,
 } from '../services/api';
 import { subscribeToCrowdUpdates } from '../services/socketService';
+import { parseTime } from '../utils/timeUtils';
 
 const CROWD_LEVELS = [
+  { level: 0, label: 'Aucune donnée pour le moment', color: '#6b7475ff', emoji: '⚪' },
   { level: 1, label: 'Très calme', color: '#27ae60', emoji: '🟢' },
   { level: 2, label: 'Peu fréquenté', color: '#2ecc71', emoji: '🟢' },
   { level: 3, label: 'Modéré', color: '#f39c12', emoji: '🟡' },
@@ -49,15 +51,13 @@ const computeForecast = (plannedVisits, arrivalTime, duration) => {
   if (!plannedVisits || plannedVisits.length === 0) return 1; // Default to Très calme if empty
 
   // Parse arrival as minutes-since-midnight
-  const [h, m] = arrivalTime.split(':').map(Number);
-  const arrivalMins = h * 60 + m;
+  const arrivalMins = parseTime(arrivalTime);
   const departureMins = arrivalMins + duration;
 
   // Count how many people are there during our stay
   // A person is "there" if their window [start2, end2] overlaps with ours [start, end]
   const overlapping = plannedVisits.filter((v) => {
-    const [h2, m2] = v.arrivalTime.split(':').map(Number);
-    const start2 = h2 * 60 + m2;
+    const start2 = parseTime(v.arrivalTime);
     const end2 = start2 + v.duration;
 
     // Overlap condition: start1 < end2 AND start2 < end1
@@ -85,10 +85,18 @@ const GymDetailScreen = ({ route, navigation }) => {
   const [updating, setUpdating] = useState(false);
 
   // Visit slot state
-  const [visitSlot, setVisitSlot] = useState(null); // { arrivalTime, duration } | null
+  const [visitSlot, setVisitSlot] = useState(null); // { arrivalTime, duration, date } | null
   const [slotModalVisible, setSlotModalVisible] = useState(false);
   const [plannedVisits, setPlannedVisits] = useState([]);
   const [forecastLevel, setForecastLevel] = useState(null);
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+  const [viewingDate, setViewingDate] = useState(todayStr); // YYYY-MM-DD
 
   // ─── Load gym ────────────────────────────────────────────────────────────
   const loadGym = async () => {
@@ -105,9 +113,10 @@ const GymDetailScreen = ({ route, navigation }) => {
   };
 
   // ─── Load crowd history & planned slots ──────────────────────────────────
-  const loadHistoryAndSlots = async () => {
+  const loadHistoryAndSlots = async (date = null) => {
     try {
-      const data = await getGymCrowdHistory(gymId);
+      const targetDate = date || viewingDate;
+      const data = await getGymCrowdHistory(gymId, targetDate);
       // data is now { updates, plannedVisits }
       setPlannedVisits(data.plannedVisits || []);
     } catch (err) {
@@ -121,10 +130,13 @@ const GymDetailScreen = ({ route, navigation }) => {
       const raw = await AsyncStorage.getItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
       if (raw) {
         const saved = JSON.parse(raw);
-        const savedDate = new Date(saved.savedAt).toDateString();
-        const today = new Date().toDateString();
-        if (savedDate === today) {
+        const slotDate = saved.slot.date || saved.savedAt.split('T')[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // Keep if it's today or in the future
+        if (slotDate >= todayStr) {
           setVisitSlot(saved.slot);
+          return saved.slot;
         } else {
           await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
         }
@@ -132,6 +144,7 @@ const GymDetailScreen = ({ route, navigation }) => {
     } catch (err) {
       console.error('Erreur lecture créneau:', err);
     }
+    return null;
   };
 
   const saveVisitSlot = async (slot) => {
@@ -165,10 +178,23 @@ const GymDetailScreen = ({ route, navigation }) => {
 
   // ─── Effects ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    loadGym();
-    loadHistoryAndSlots();
-    loadVisitSlot();
+    const init = async () => {
+      await loadGym();
+      const savedSlot = await loadVisitSlot();
+      if (savedSlot?.date) {
+        setViewingDate(savedSlot.date);
+        await loadHistoryAndSlots(savedSlot.date);
+      } else {
+        await loadHistoryAndSlots(todayStr);
+      }
+    };
+    init();
   }, [gymId]);
+
+  // Refetch when viewingDate changes
+  useEffect(() => {
+    loadHistoryAndSlots(viewingDate);
+  }, [viewingDate]);
 
   useFocusEffect(
     useCallback(() => {
@@ -180,7 +206,11 @@ const GymDetailScreen = ({ route, navigation }) => {
   useEffect(() => {
     const unsubscribe = subscribeToCrowdUpdates((data) => {
       if (data.gymId === gymId) {
-        setGym(prev => prev ? { ...prev, crowdLevel: data.crowdLevel } : null);
+        setGym(prev => prev ? {
+          ...prev,
+          crowdLevel: data.crowdLevel,
+          crowdUpdatesCount: data.crowdUpdatesCount
+        } : null);
       }
     });
     return () => unsubscribe();
@@ -199,14 +229,19 @@ const GymDetailScreen = ({ route, navigation }) => {
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const handleSlotConfirm = async (slot) => {
     setVisitSlot(slot);
+    setViewingDate(slot.date);
     await saveVisitSlot(slot);
+    await loadHistoryAndSlots(slot.date);
     setSlotModalVisible(false);
   };
 
   const handleResetSlot = async () => {
     setVisitSlot(null);
     setForecastLevel(null);
+    setViewingDate(todayStr);
     await AsyncStorage.removeItem(`${VISIT_SLOT_KEY_PREFIX}${gymId}`);
+    await loadHistoryAndSlots(todayStr);
+    setSlotModalVisible(true);
   };
 
   const handleSubscribe = async () => {
@@ -292,9 +327,9 @@ const GymDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  const crowdInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(gym.crowdLevel)) || CROWD_LEVELS[2];
+  const crowdInfo = CROWD_LEVELS.find(c => Number(c.level) === Number(gym.crowdLevel)) || CROWD_LEVELS.find(c => c.level === 0);
   const forecastInfo = forecastLevel
-    ? CROWD_LEVELS.find(c => c.level === forecastLevel) || CROWD_LEVELS[2]
+    ? CROWD_LEVELS.find(c => c.level === forecastLevel) || CROWD_LEVELS.find(c => c.level === 3)
     : null;
 
   const durationLabel = visitSlot
@@ -302,6 +337,9 @@ const GymDetailScreen = ({ route, navigation }) => {
       .map((v, i) => ({ v, l: ['1h', '1h30', '2h', '2h30', '3h+'][i] }))
       .find(x => x.v === visitSlot.duration)?.l || `${visitSlot.duration / 60}h`
     : '';
+
+  const isSlotTomorrow = visitSlot?.date && visitSlot.date > todayStr;
+  const viewingDayLabel = viewingDate === tomorrowStr ? 'demain' : "aujourd'hui";
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -333,12 +371,9 @@ const GymDetailScreen = ({ route, navigation }) => {
           // UNLOCKED — show real crowd level
           <View style={[styles.crowdBanner, { backgroundColor: crowdInfo.color + '15' }]}>
             <View style={styles.crowdBannerHeader}>
-              <Text style={styles.crowdTitle}>Affluence actuelle</Text>
-              <TouchableOpacity onPress={() => setSlotModalVisible(true)}>
-                <Text style={styles.slotChip}>
-                  🕐 {visitSlot.arrivalTime} · {durationLabel}
-                </Text>
-              </TouchableOpacity>
+              <Text style={styles.crowdTitle}>
+                Affluence actuelle ({gym.crowdUpdatesCount || 0} contribution{gym.crowdUpdatesCount > 1 ? 's' : ''})
+              </Text>
             </View>
             <View style={styles.crowdDisplay}>
               <Text style={styles.crowdEmoji}>{crowdInfo.emoji}</Text>
@@ -349,7 +384,26 @@ const GymDetailScreen = ({ route, navigation }) => {
 
             {/* Forecast section */}
             <View style={styles.forecastDivider} />
-            <Text style={styles.forecastTitle}>📊 Prévision pour votre créneau</Text>
+
+            <View style={styles.forecastHeaderRow}>
+              <Text style={styles.forecastTitle}>📊 Prévision pour {viewingDayLabel}</Text>
+
+              {/* Day Selector Tabs */}
+              <View style={styles.dayToggle}>
+                <TouchableOpacity
+                  onPress={() => setViewingDate(todayStr)}
+                  style={[styles.dayTab, viewingDate === todayStr && styles.dayTabActive]}
+                >
+                  <Text style={[styles.dayTabText, viewingDate === todayStr && styles.dayTabTextActive]}>Auj.</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setViewingDate(tomorrowStr)}
+                  style={[styles.dayTab, viewingDate === tomorrowStr && styles.dayTabActive]}
+                >
+                  <Text style={[styles.dayTabText, viewingDate === tomorrowStr && styles.dayTabTextActive]}>Dem.</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             {forecastInfo ? (
               <View style={styles.forecastRow}>
                 <Text style={styles.forecastEmoji}>{forecastInfo.emoji}</Text>
@@ -367,12 +421,21 @@ const GymDetailScreen = ({ route, navigation }) => {
             <CrowdChart
               plannedVisits={plannedVisits}
               openingHours={gym?.openingHours}
+              date={viewingDate}
             />
 
-            {/* Reset */}
-            <TouchableOpacity onPress={handleResetSlot} style={styles.resetButton}>
-              <Text style={styles.resetText}>Réinitialiser le créneau</Text>
-            </TouchableOpacity>
+            {/* Slot Footer */}
+            <View style={styles.slotFooter}>
+              <TouchableOpacity onPress={() => setSlotModalVisible(true)}>
+                <Text style={styles.slotChip}>
+                  📅 {isSlotTomorrow ? 'Demain' : "Aujourd'hui"} · {visitSlot.arrivalTime}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleResetSlot} style={styles.resetButton}>
+                <Text style={styles.resetText}>Réinitialiser le créneau</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           // LOCKED — blurred overlay
@@ -426,8 +489,6 @@ const GymDetailScreen = ({ route, navigation }) => {
           )}
         </View>
 
-        <Text style={styles.description}>{gym.description}</Text>
-
         {/* Contact */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📞 Contact</Text>
@@ -438,30 +499,14 @@ const GymDetailScreen = ({ route, navigation }) => {
             <Text style={styles.link}>🌐 Site web</Text>
           </TouchableOpacity>
         </View>
-
+        
         {/* Pricing */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>💰 Tarifs</Text>
           <View style={styles.pricingGrid}>
             <View style={styles.priceItem}>
               <Text style={styles.priceLabel}>Entrée unique</Text>
-              <Text style={styles.priceValue}>{gym.pricing.singleEntry}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Carte 10 séances</Text>
-              <Text style={styles.priceValue}>{gym.pricing.tenSessions}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Abonnement mensuel</Text>
-              <Text style={styles.priceValue}>{gym.pricing.monthlyUnlimited}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Abonnement annuel</Text>
-              <Text style={styles.priceValue}>{gym.pricing.yearlySubscription}</Text>
-            </View>
-            <View style={styles.priceItem}>
-              <Text style={styles.priceLabel}>Location matériel</Text>
-              <Text style={styles.priceValue}>{gym.pricing.equipmentRental}</Text>
+              <Text style={styles.priceValue}>{gym.pricing.single} €</Text>
             </View>
           </View>
         </View>
@@ -469,27 +514,38 @@ const GymDetailScreen = ({ route, navigation }) => {
         {/* Opening hours */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🕐 Horaires</Text>
-          {Object.entries(gym.openingHours).map(([day, hours]) => (
-            <View key={day} style={styles.scheduleRow}>
-              <Text style={styles.dayText}>
-                {day.charAt(0).toUpperCase() + day.slice(1)}
-              </Text>
-              <Text style={styles.hoursText}>{hours}</Text>
-            </View>
-          ))}
+          {(() => {
+            const dayNames = {
+              monday: 'Lundi',
+              tuesday: 'Mardi',
+              wednesday: 'Mercredi',
+              thursday: 'Jeudi',
+              friday: 'Vendredi',
+              saturday: 'Samedi',
+              sunday: 'Dimanche'
+            };
+            return ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
+              <View key={day} style={styles.scheduleRow}>
+                <Text style={styles.dayText}>{dayNames[day]}</Text>
+                <Text style={styles.hoursText}>{gym.openingHours[day] || 'Fermé'}</Text>
+              </View>
+            ));
+          })()}
         </View>
 
-        {/* Features */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>✨ Équipements</Text>
-          <View style={styles.featuresContainer}>
-            {gym.features.map((feature, index) => (
-              <View key={index} style={styles.featureTag}>
-                <Text style={styles.featureText}>{feature}</Text>
-              </View>
-            ))}
+        {/* Features - kept for future use */}
+        {gym.features && gym.features.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>✨ Équipements</Text>
+            <View style={styles.featuresContainer}>
+              {gym.features.map((feature, index) => (
+                <View key={index} style={styles.featureTag}>
+                  <Text style={styles.featureText}>{feature}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
       </View>
 
       {/* Visit slot modal */}
@@ -639,7 +695,36 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     fontWeight: '600',
     letterSpacing: 0.5,
-    marginBottom: 6,
+  },
+  forecastHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  dayToggle: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 8,
+    padding: 2,
+  },
+  dayTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  dayTabActive: {
+    backgroundColor: '#fff',
+    boxShadow: '0 1 2 rgba(0, 0, 0, 0.1)',
+    elevation: 2,
+  },
+  dayTabText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#7f8c8d',
+  },
+  dayTabTextActive: {
+    color: '#1a2332',
   },
   forecastRow: {
     flexDirection: 'row',
@@ -664,13 +749,18 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   resetButton: {
-    marginTop: 14,
-    alignSelf: 'flex-end',
+    // Bouton à droite via le footer
   },
   resetText: {
     fontSize: 12,
     color: '#95a5a6',
     textDecorationLine: 'underline',
+  },
+  slotFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 14,
   },
   // ── Locked banner ─────────────────────────────────────────────────────────
   lockedBanner: {
@@ -737,10 +827,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
-    shadowColor: '#e74c3c',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
+    boxShadow: '0 3 6 rgba(231, 76, 60, 0.25)',
     elevation: 3,
   },
   unlockButtonText: {

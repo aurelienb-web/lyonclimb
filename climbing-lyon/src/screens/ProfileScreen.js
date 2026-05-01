@@ -23,24 +23,11 @@ const ProfileScreen = () => {
     );
   }
 
-  // Truncate device ID for display: show first 8 and last 4 chars
-  const displayId = user?.id
-    ? `${user.id.substring(0, 12)}…`
-    : '—';
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarIcon}>📱</Text>
-          </View>
-          <Text style={styles.userName}>Mon appareil</Text>
-          <Text style={styles.deviceId}>ID : {displayId}</Text>
-        </View>
-
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>📱 À propos de l'app</Text>
+          <Text style={styles.sectionTitle}>📱 A propos de Climbing Lyon</Text>
 
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>🧗 Salles d'Escalade Lyon</Text>

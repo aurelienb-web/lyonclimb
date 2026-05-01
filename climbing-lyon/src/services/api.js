@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// const API_BASE_URL = 'https://work-1-qvlwqbjsnisnedpv.prod-runtime.all-hands.dev/api';
-const API_BASE_URL = 'http://192.168.1.20:12000/api';
-//const API_BASE_URL = 'http://192.168.1.11:12000/api';
+//const API_BASE_URL = 'https://lyonclimb.onrender.com/api';
+const API_BASE_URL = 'http://192.168.1.11:12000/api';
 
 
 const api = axios.create({
@@ -54,8 +53,10 @@ export const updateCrowdLevel = async (gymId, userId, crowdLevel) => {
   return response.data;
 };
 
-export const getGymCrowdHistory = async (gymId) => {
-  const response = await api.get(`/gyms/${gymId}/crowd-history`);
+export const getGymCrowdHistory = async (gymId, date = null) => {
+  const response = await api.get(`/gyms/${gymId}/crowd-history`, {
+    params: date ? { date } : {}
+  });
   return response.data;
 };
 
@@ -63,7 +64,8 @@ export const registerVisitSlot = async (gymId, userId, slot) => {
   const response = await api.post(`/gyms/${gymId}/slots`, {
     userId,
     arrivalTime: slot.arrivalTime,
-    duration: slot.duration
+    duration: slot.duration,
+    visitDate: slot.date
   });
   return response.data;
 };

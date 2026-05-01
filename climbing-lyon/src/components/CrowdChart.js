@@ -16,21 +16,25 @@ const CROWD_LEVELS = [
   { level: 5, label: 'Très fréquenté', color: '#e74c3c' },
 ];
 
-const CrowdChart = ({ plannedVisits, openingHours }) => {
+const CrowdChart = ({ plannedVisits, openingHours, date }) => {
   const [selectedBar, setSelectedBar] = useState(null);
   const scrollRef = useRef(null);
   const [scrollX, setScrollX] = useState(0);
 
   if (!openingHours) return null;
 
+  const targetDateStr = date || new Date().toISOString().split('T')[0];
+  const isToday = targetDateStr === new Date().toISOString().split('T')[0];
+
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const todayKey = days[new Date().getDay()];
-  const hoursString = openingHours[todayKey];
+  const dayIndex = new Date(targetDateStr).getDay();
+  const dayKey = days[dayIndex];
+  const hoursString = openingHours[dayKey];
 
   if (!hoursString || hoursString === 'Fermé') {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>La salle est fermée aujourd'hui.</Text>
+        <Text style={styles.emptyText}>La salle est fermée ce jour-là.</Text>
       </View>
     );
   }
@@ -44,7 +48,8 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
   const openMins = toMins(openStr);
   const closeMins = toMins(closeStr);
 
-  const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
 
   // Generate 30-min slots
   const slots = [];
@@ -52,7 +57,7 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    
+
     // Count overlapping visits
     const overlapping = plannedVisits.filter(v => {
       const vStart = toMins(v.arrivalTime);
@@ -60,7 +65,7 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
       return mins < vEnd && vStart < mins + 30;
     });
 
-    const isPast = mins + 30 <= nowMins;
+    const isPast = isToday && (mins + 30 <= nowMins);
 
     const count = overlapping.length;
     let level = 1;
@@ -94,10 +99,10 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
           <Text style={styles.arrowText}>‹</Text>
         </TouchableOpacity>
 
-        <ScrollView 
+        <ScrollView
           ref={scrollRef}
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+          horizontal
+          showsHorizontalScrollIndicator={false}
           style={styles.scroll}
           onScroll={(e) => setScrollX(e.nativeEvent.contentOffset.x)}
           scrollEventThrottle={16}
@@ -109,12 +114,11 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
               const height = 45 + (slot.level * 8);
 
               return (
-                <View key={index} style={styles.barWrapper}>
+                <View key={index} style={[styles.barWrapper, isSelected && { zIndex: 999 }]}>
                   <TouchableOpacity
                     activeOpacity={0.7}
                     onPress={() => setSelectedBar(isSelected ? null : index)}
-                    onMouseEnter={() => setSelectedBar(index)}
-                    onMouseLeave={() => setSelectedBar(null)}
+                    hitSlop={{ top: 10, bottom: 25, left: 5, right: 5 }}
                     style={[
                       styles.bar,
                       {
@@ -148,17 +152,19 @@ const CrowdChart = ({ plannedVisits, openingHours }) => {
                   </TouchableOpacity>
                   {(index % 2 === 0 || isSelected) && (
                     <Text style={[
-                      styles.timeText, 
+                      styles.timeText,
                       isSelected && styles.timeTextSelected,
                       (index % 2 !== 0 && isSelected) && { bottom: -35 }
                     ]}>
                       {slot.time}
                     </Text>
                   )}
-                  
+
                   {isSelected && (
-                    <View style={styles.tooltip}>
-                      <Text style={styles.tooltipText}>{slot.count} pers.</Text>
+                    <View style={styles.tooltip} pointerEvents="none">
+                      <Text style={styles.tooltipText} numberOfLines={1}>
+                        {CROWD_LEVELS.find(cl => cl.level === slot.level)?.label}
+                      </Text>
                     </View>
                   )}
                 </View>
@@ -206,9 +212,9 @@ const styles = StyleSheet.create({
   chartArea: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: 155, // Légèrement augmenté pour laisser de la place aux labels et tooltips
-    paddingBottom: 45, // Augmenté pour contenir les labels à -35px
-    paddingHorizontal: 5,
+    height: 160, // Hauteur optimale pour barres max + bulles compactes
+    paddingBottom: 25,
+    paddingHorizontal: 45, // Augmenté pour que les infobulles aux extrémités soient visibles
   },
   barWrapper: {
     alignItems: 'center',
@@ -234,17 +240,18 @@ const styles = StyleSheet.create({
   },
   tooltip: {
     position: 'absolute',
-    top: -25,
+    top: -32, // Un peu plus proche encore (32px au lieu de 35px)
     backgroundColor: '#1a2332',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    minWidth: 45,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    zIndex: 100,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   tooltipText: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
   },
   emptyContainer: {

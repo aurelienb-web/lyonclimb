@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
 const path = require('path');
+const supabase = require('./supabase'); // Import the supabase client
 
 const app = express();
 const http = require('http');
@@ -22,71 +22,40 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const DATA_FILE = path.join(__dirname, 'data.json');
-
-// Helper functions to read/write data
-function readData() {
-  const data = fs.readFileSync(DATA_FILE, 'utf8');
-  return JSON.parse(data);
-}
-
-function writeData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
-
-// Clean up old data (crowd updates > 24h)
-function cleanUpOldData() {
+// Clean up old data (crowd updates > 24h & past planned visits)
+async function cleanUpOldData() {
   console.log('🧹 Exécution du nettoyage des données...');
-  const data = readData();
   const now = new Date();
-  const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-  const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+  const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000)).toISOString();
+  const todayStr = now.toISOString().split('T')[0];
 
-  let changes = false;
+  try {
+    const { error: err1 } = await supabase.from('crowdUpdates').delete().lt('timestamp', twentyFourHoursAgo);
+    if (!err1) console.log(`✅ Mises à jour d'affluence obsolètes nettoyées.`);
 
-  // 2. Clean crowd updates (> 24h)
-  const initialCrowdCount = data.crowdUpdates.length;
-  data.crowdUpdates = data.crowdUpdates.filter(u => new Date(u.timestamp) > twentyFourHoursAgo);
-  if (data.crowdUpdates.length !== initialCrowdCount) {
-    console.log(`✅ Supprimé ${initialCrowdCount - data.crowdUpdates.length} mises à jour d'affluence obsolètes.`);
-    changes = true;
-  }
-
-  // 3. Clean planned visits (> 24h)
-  if (!data.plannedVisits) data.plannedVisits = [];
-  const initialSlotCount = data.plannedVisits.length;
-  data.plannedVisits = data.plannedVisits.filter(v => new Date(v.createdAt) > twentyFourHoursAgo);
-  if (data.plannedVisits.length !== initialSlotCount) {
-    console.log(`✅ Supprimé ${initialSlotCount - data.plannedVisits.length} créneaux planifiés obsolètes.`);
-    changes = true;
-  }
-
-  if (changes) {
-    writeData(data);
-    console.log('💾 Données nettoyées et sauvegardées.');
-  } else {
-    console.log('✨ Aucune donnée obsolète à nettoyer.');
+    const { error: err2 } = await supabase.from('plannedVisits').delete().lt('visitDate', todayStr);
+    if (!err2) console.log(`✅ Créneaux planifiés obsolètes nettoyés.`);
+  } catch (err) {
+    console.error('Erreur lors du nettoyage:', err);
   }
 }
-
 
 // GET all gyms
-app.get('/api/gyms', (req, res) => {
-  const data = readData();
+app.get('/api/gyms', async (req, res) => {
+  const { data: gyms, error } = await supabase.from('gyms').select('*');
+  if (error) return res.status(500).json({ error: error.message });
 
   // Recalculate averages for all gyms based on last 30 minutes (latest vote per user)
-  const recentThreshold = new Date().getTime() - (30 * 60 * 1000);
+  const recentThreshold = new Date(Date.now() - (30 * 60 * 1000)).toISOString();
+  const { data: recentUpdates } = await supabase.from('crowdUpdates').select('*').gte('timestamp', recentThreshold);
 
-  const updatedGyms = data.gyms.map(gym => {
-    const recentUpdates = data.crowdUpdates.filter(u =>
-      u.gymId === gym.id &&
-      new Date(u.timestamp).getTime() > recentThreshold
-    );
+  const updatedGyms = gyms.map(gym => {
+    const gymUpdates = (recentUpdates || []).filter(u => u.gymId === gym.id);
 
-    if (recentUpdates.length > 0) {
+    if (gymUpdates.length > 0) {
       // Group by user and take latest vote
       const latestVotesPerUser = {};
-      recentUpdates.forEach(u => {
+      gymUpdates.forEach(u => {
         const timestamp = new Date(u.timestamp).getTime();
         if (!latestVotesPerUser[u.userId] || timestamp > latestVotesPerUser[u.userId].timestamp) {
           latestVotesPerUser[u.userId] = { level: u.crowdLevel, timestamp };
@@ -95,35 +64,34 @@ app.get('/api/gyms', (req, res) => {
 
       const votes = Object.values(latestVotesPerUser);
       const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
-      return { ...gym, crowdLevel: Math.round(sum / votes.length) };
+      return { ...gym, crowdLevel: Math.round(sum / votes.length), crowdUpdatesCount: votes.length };
     }
-    return gym;
+    return { ...gym, crowdLevel: 0, crowdUpdatesCount: 0 };
   });
 
   res.json(updatedGyms);
 });
 
 // GET single gym
-app.get('/api/gyms/:id', (req, res) => {
+app.get('/api/gyms/:id', async (req, res) => {
   const { userId } = req.query;
-  const data = readData();
-  const gym = data.gyms.find(g => g.id === req.params.id);
+  const { data: gym, error } = await supabase.from('gyms').select('*').eq('id', req.params.id).single();
 
-  if (!gym) {
+  if (error || !gym) {
     return res.status(404).json({ error: 'Salle non trouvée' });
   }
 
-  // Recalculate average crowd level (last 30 minutes, latest vote per user)
-  const recentThreshold = new Date().getTime() - (30 * 60 * 1000);
-
-  const recentUpdates = data.crowdUpdates.filter(u =>
-    u.gymId === req.params.id &&
-    new Date(u.timestamp).getTime() > recentThreshold
-  );
+  // Recalculate average crowd level (last 30 minutes)
+  const recentThreshold = new Date(Date.now() - (30 * 60 * 1000)).toISOString();
+  const { data: recentUpdates } = await supabase.from('crowdUpdates')
+    .select('*')
+    .eq('gymId', req.params.id)
+    .gte('timestamp', recentThreshold);
 
   let crowdLevel = gym.crowdLevel;
-  if (recentUpdates.length > 0) {
-    // Group by user and take latest vote
+  let crowdUpdatesCount = 0;
+
+  if (recentUpdates && recentUpdates.length > 0) {
     const latestVotesPerUser = {};
     recentUpdates.forEach(u => {
       const timestamp = new Date(u.timestamp).getTime();
@@ -135,16 +103,23 @@ app.get('/api/gyms/:id', (req, res) => {
     const votes = Object.values(latestVotesPerUser);
     const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
     crowdLevel = Math.round(sum / votes.length);
+    crowdUpdatesCount = votes.length;
+  } else {
+    crowdLevel = 0;
+    crowdUpdatesCount = 0;
   }
 
-  // Get user's last contribution (ever, or could be last 24h)
+  // Get user's last contribution
   let userLastContribution = null;
   if (userId) {
-    const userUpdates = data.crowdUpdates
-      .filter(u => u.gymId === req.params.id && u.userId === userId)
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const { data: userUpdates } = await supabase.from('crowdUpdates')
+      .select('crowdLevel')
+      .eq('gymId', req.params.id)
+      .eq('userId', userId)
+      .order('timestamp', { ascending: false })
+      .limit(1);
 
-    if (userUpdates.length > 0) {
+    if (userUpdates && userUpdates.length > 0) {
       userLastContribution = userUpdates[0].crowdLevel;
     }
   }
@@ -152,47 +127,46 @@ app.get('/api/gyms/:id', (req, res) => {
   res.json({
     ...gym,
     crowdLevel,
+    crowdUpdatesCount,
     userLastContribution
   });
 });
 
 // Register or retrieve a device-based user (no email required)
-app.post('/api/auth/device', (req, res) => {
+app.post('/api/auth/device', async (req, res) => {
   const { deviceId, deviceName } = req.body;
   if (!deviceId) {
     return res.status(400).json({ error: 'deviceId requis' });
   }
 
-  const data = readData();
-  let user = data.users.find(u => u.deviceId === deviceId);
+  let { data: user } = await supabase.from('users').select('*').eq('deviceId', deviceId).single();
 
   if (!user) {
-    user = {
-      id: deviceId,
+    const newUser = {
+      id: deviceId, // For compatibility with existing IDs logic
       deviceId,
-      name: deviceName || 'Appareil',
-      createdAt: new Date().toISOString()
+      name: deviceName || 'Appareil'
     };
-    data.users.push(user);
-    writeData(data);
+    const { data: insertedUser, error } = await supabase.from('users').insert([newUser]).select().single();
+    if (error) return res.status(500).json({ error: error.message });
+    user = insertedUser;
   }
 
   res.json({ user, message: 'Appareil enregistré' });
 });
 
 // Subscribe to a gym
-app.post('/api/subscriptions', (req, res) => {
+app.post('/api/subscriptions', async (req, res) => {
   const { userId, gymId } = req.body;
   if (!userId || !gymId) {
     return res.status(400).json({ error: 'userId et gymId requis' });
   }
 
-  const data = readData();
-
-  // Check if subscription already exists
-  const existingSub = data.subscriptions.find(
-    s => s.userId === userId && s.gymId === gymId
-  );
+  const { data: existingSub } = await supabase.from('subscriptions')
+    .select('id')
+    .eq('userId', userId)
+    .eq('gymId', gymId)
+    .single();
 
   if (existingSub) {
     return res.status(400).json({ error: 'Déjà abonné à cette salle' });
@@ -201,47 +175,37 @@ app.post('/api/subscriptions', (req, res) => {
   const subscription = {
     id: uuidv4(),
     userId,
-    gymId,
-    createdAt: new Date().toISOString()
+    gymId
   };
 
-  data.subscriptions.push(subscription);
-  writeData(data);
+  const { data, error } = await supabase.from('subscriptions').insert([subscription]).select().single();
+  if (error) return res.status(500).json({ error: error.message });
 
-
-  res.json({ subscription, message: 'Abonnement créé' });
+  res.json({ subscription: data, message: 'Abonnement créé' });
 });
 
 // Unsubscribe from a gym
-app.delete('/api/subscriptions/:userId/:gymId', (req, res) => {
+app.delete('/api/subscriptions/:userId/:gymId', async (req, res) => {
   const { userId, gymId } = req.params;
-  const data = readData();
+  const { error } = await supabase.from('subscriptions').delete().eq('userId', userId).eq('gymId', gymId);
 
-  const index = data.subscriptions.findIndex(
-    s => s.userId === userId && s.gymId === gymId
-  );
-
-  if (index === -1) {
-    return res.status(404).json({ error: 'Abonnement non trouvé' });
-  }
-
-  data.subscriptions.splice(index, 1);
-  writeData(data);
-
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ message: 'Désabonnement effectué' });
 });
 
 // Get user subscriptions
-app.get('/api/subscriptions/:userId', (req, res) => {
-  const data = readData();
-  const subscriptions = data.subscriptions.filter(s => s.userId === req.params.userId);
+app.get('/api/subscriptions/:userId', async (req, res) => {
+  const { data: subscriptions } = await supabase.from('subscriptions').select('gymId').eq('userId', req.params.userId);
+  if (!subscriptions || subscriptions.length === 0) return res.json([]);
+  
   const gymIds = subscriptions.map(s => s.gymId);
-  const subscribedGyms = data.gyms.filter(g => gymIds.includes(g.id));
-  res.json(subscribedGyms);
+  const { data: subscribedGyms } = await supabase.from('gyms').select('*').in('id', gymIds);
+  
+  res.json(subscribedGyms || []);
 });
 
 // Update crowd level
-app.post('/api/gyms/:id/crowd', (req, res) => {
+app.post('/api/gyms/:id/crowd', async (req, res) => {
   const { userId, crowdLevel } = req.body;
   if (!userId || crowdLevel === undefined) {
     return res.status(400).json({ error: 'userId et crowdLevel requis' });
@@ -252,36 +216,31 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
     return res.status(400).json({ error: 'Niveau d\'affluence entre 1 et 5' });
   }
 
-  const data = readData();
-  const gym = data.gyms.find(g => g.id === req.params.id);
-
-  if (!gym) {
-    return res.status(404).json({ error: 'Salle non trouvée' });
-  }
+  const { data: gym, error } = await supabase.from('gyms').select('*').eq('id', req.params.id).single();
+  if (error || !gym) return res.status(404).json({ error: 'Salle non trouvée' });
 
   // Log the update
   const update = {
     id: uuidv4(),
     gymId: req.params.id,
     userId,
-    crowdLevel: numericCrowdLevel,
-    timestamp: new Date().toISOString()
+    crowdLevel: numericCrowdLevel
   };
-  data.crowdUpdates.push(update);
+  await supabase.from('crowdUpdates').insert([update]);
 
-  // Recalculate average crowd level (last 30 minutes, latest vote per user)
-  const now = new Date().getTime();
-  const recentThreshold = now - (30 * 60 * 1000);
+  // Recalculate average crowd level
+  const now = new Date();
+  const recentThreshold = new Date(now.getTime() - (30 * 60 * 1000)).toISOString();
 
-  const recentUpdates = data.crowdUpdates.filter(u =>
-    u.gymId === req.params.id &&
-    new Date(u.timestamp).getTime() > recentThreshold
-  );
+  const { data: recentUpdates } = await supabase.from('crowdUpdates')
+    .select('*')
+    .eq('gymId', req.params.id)
+    .gte('timestamp', recentThreshold);
 
-  console.log(`[Gym ${req.params.id}] Calculating average from ${recentUpdates.length} recent updates`);
+  let crowdUpdatesCount = 0;
+  let newCrowdLevel = gym.crowdLevel;
 
-  if (recentUpdates.length > 0) {
-    // Group by user and take latest vote
+  if (recentUpdates && recentUpdates.length > 0) {
     const latestVotesPerUser = {};
     recentUpdates.forEach(u => {
       const ts = new Date(u.timestamp).getTime();
@@ -292,37 +251,40 @@ app.post('/api/gyms/:id/crowd', (req, res) => {
 
     const votes = Object.values(latestVotesPerUser);
     const sum = votes.reduce((acc, v) => acc + Number(v.level), 0);
-    gym.crowdLevel = Math.round(sum / votes.length);
-    console.log(`[Gym ${req.params.id}] New average: ${gym.crowdLevel} (from ${votes.length} users)`);
+    newCrowdLevel = Math.round(sum / votes.length);
+    crowdUpdatesCount = votes.length;
+    
+    // Update gym record in DB optionally to cache it
+    await supabase.from('gyms').update({ crowdLevel: newCrowdLevel }).eq('id', req.params.id);
   } else {
-    gym.crowdLevel = crowdLevel;
+    newCrowdLevel = crowdLevel;
   }
-
-  writeData(data);
 
   // Emit real-time update
   io.emit('gym_crowd_updated', {
     gymId: req.params.id,
-    crowdLevel: gym.crowdLevel
+    crowdLevel: newCrowdLevel,
+    crowdUpdatesCount
   });
 
-  res.json({ gym, message: 'Affluence mise à jour' });
+  res.json({ gym: { ...gym, crowdLevel: newCrowdLevel, crowdUpdatesCount }, message: 'Affluence mise à jour' });
 });
 
-
-
 // Register a planned visit slot
-app.post('/api/gyms/:id/slots', (req, res) => {
-  const { userId, arrivalTime, duration } = req.body;
+app.post('/api/gyms/:id/slots', async (req, res) => {
+  const { userId, arrivalTime, duration, visitDate } = req.body;
   if (!userId || !arrivalTime || !duration) {
     return res.status(400).json({ error: 'userId, arrivalTime et duration requis' });
   }
 
-  const data = readData();
-  if (!data.plannedVisits) data.plannedVisits = [];
+  const targetDate = visitDate || new Date().toISOString().split('T')[0];
 
-  // Remove previous slot for this user/gym if exists (latest intention only)
-  data.plannedVisits = data.plannedVisits.filter(v => !(v.userId === userId && v.gymId === req.params.id));
+  // Remove previous slot for this user/gym/date if exists (latest intention only)
+  await supabase.from('plannedVisits')
+    .delete()
+    .eq('userId', userId)
+    .eq('gymId', req.params.id)
+    .eq('visitDate', targetDate);
 
   const visit = {
     id: uuidv4(),
@@ -330,48 +292,43 @@ app.post('/api/gyms/:id/slots', (req, res) => {
     userId,
     arrivalTime,
     duration,
-    createdAt: new Date().toISOString()
+    visitDate: targetDate
   };
 
-  data.plannedVisits.push(visit);
-  writeData(data);
+  const { data, error } = await supabase.from('plannedVisits').insert([visit]).select().single();
+  if (error) return res.status(500).json({ error: error.message });
 
-  res.json({ visit, message: 'Visite planifiée enregistrée' });
+  res.json({ visit: data, message: 'Visite planifiée enregistrée' });
 });
 
 // GET crowd history for a gym (last 7 days) — used for crowd forecast
-app.get('/api/gyms/:id/crowd-history', (req, res) => {
-  const data = readData();
-  const gym = data.gyms.find(g => g.id === req.params.id);
+app.get('/api/gyms/:id/crowd-history', async (req, res) => {
+  const { date } = req.query;
+  const targetDateStr = date || new Date().toISOString().split('T')[0];
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  if (!gym) {
-    return res.status(404).json({ error: 'Salle non trouvée' });
-  }
+  const { data: updates } = await supabase.from('crowdUpdates')
+    .select('*')
+    .eq('gymId', req.params.id)
+    .gte('timestamp', sevenDaysAgo);
 
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-  const updates = data.crowdUpdates.filter(u =>
-    u.gymId === req.params.id &&
-    new Date(u.timestamp) > sevenDaysAgo
-  );
-
-  const currentSlots = (data.plannedVisits || []).filter(v => 
-    v.gymId === req.params.id &&
-    new Date(v.createdAt).toDateString() === new Date().toDateString()
-  );
+  const { data: plannedVisits } = await supabase.from('plannedVisits')
+    .select('*')
+    .eq('gymId', req.params.id)
+    .eq('visitDate', targetDateStr);
 
   res.json({
-    updates,
-    plannedVisits: currentSlots
+    updates: updates || [],
+    plannedVisits: plannedVisits || []
   });
 });
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ status: 'OK', timestamp: new Date().toISOString(), database: 'Supabase' });
 });
 
-// Serve API documentation at /api-docs
+// Serve API documentation at /api-docs (kept from previous code)
 app.get('/api-docs', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -387,48 +344,21 @@ app.get('/api-docs', (req, res) => {
         .method { display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; margin-right: 10px; }
         .get { background: #27ae60; }
         .post { background: #3498db; }
-        .put { background: #f39c12; }
         .delete { background: #e74c3c; }
         code { background: #ecf0f1; padding: 2px 6px; border-radius: 4px; }
       </style>
     </head>
     <body>
       <h1>🧗 API Salles d'Escalade Lyon</h1>
-      <p>Backend pour l'application de référencement des salles d'escalade de Lyon</p>
-      <p><a href="/">← Retour à l'application</a></p>
+      <p>Backend pour l'application de référencement des salles d'escalade de Lyon (Supabase Edition)</p>
       
       <h2>Endpoints disponibles</h2>
-      
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/gyms</code> - Liste toutes les salles d'escalade
-      </div>
-      
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <code>/api/gyms/:id</code> - Détails d'une salle
-      </div>
-      
-      <div class="endpoint">
-        <span class="method post">POST</span>
-        <code>/api/auth/login</code> - Connexion utilisateur (email)
-      </div>
-      
-      <div class="endpoint">
-        <span class="method post">POST</span>
-        <code>/api/subscriptions</code> - S'abonner à une salle
-      </div>
-      
-      <div class="endpoint">
-        <span class="method delete">DELETE</span>
-        <code>/api/subscriptions/:userId/:gymId</code> - Se désabonner
-      </div>
-      
-      <div class="endpoint">
-        <span class="method post">POST</span>
-        <code>/api/gyms/:id/crowd</code> - Mettre à jour l'affluence
-      </div>
-      
+      <div class="endpoint"><span class="method get">GET</span><code>/api/gyms</code> - Liste toutes les salles d'escalade</div>
+      <div class="endpoint"><span class="method get">GET</span><code>/api/gyms/:id</code> - Détails d'une salle</div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/auth/device</code> - Connexion appareil</div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/subscriptions</code> - S'abonner à une salle</div>
+      <div class="endpoint"><span class="method delete">DELETE</span><code>/api/subscriptions/:userId/:gymId</code> - Se désabonner</div>
+      <div class="endpoint"><span class="method post">POST</span><code>/api/gyms/:id/crowd</code> - Mettre à jour l'affluence</div>
     </body>
     </html>
   `);
@@ -441,5 +371,5 @@ setInterval(cleanUpOldData, 60 * 60 * 1000); // Every hour
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🧗 Serveur démarré sur le port ${PORT}`);
   console.log(`📍 API disponible sur http://localhost:${PORT}/api`);
-  console.log(`🔌 WebSockets activés`);
+  console.log(`🔌 WebSockets activés (Supabase Mode)`);
 });

@@ -20,7 +20,7 @@ const TabIcon = ({ name, focused }) => {
   const icons = {
     'Salles': '🧗',
     'Mes salles': '⭐',
-    'Profil': '👤',
+    'A propos de Climbing Lyon': '👤',
   };
   
   return (
@@ -65,20 +65,24 @@ const MainTabs = () => (
         borderTopWidth: 1,
         borderTopColor: '#ecf0f1',
         paddingTop: 8,
-        paddingBottom: 8,
-        height: 70,
+        paddingBottom: 24,
+        height: 85,
       },
       tabBarLabelStyle: {
         fontSize: 12,
         fontWeight: '600',
-        marginTop: 4,
+        marginTop: 0,
       },
       headerShown: false,
     })}
   >
     <Tab.Screen name="Salles" component={HomeStack} />
     <Tab.Screen name="Mes salles" component={SubscriptionsScreen} />
-    <Tab.Screen name="Profil" component={ProfileScreen} />
+    <Tab.Screen 
+      name="A propos de Climbing Lyon" 
+      component={ProfileScreen} 
+      options={{ tabBarLabel: "L'app" }}
+    />
   </Tab.Navigator>
 );
 
