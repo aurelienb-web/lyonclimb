@@ -9,8 +9,8 @@
 export const parseTime = (str) => {
   if (!str) return null;
   const clean = str.trim().toLowerCase();
-  // Match "10:00" or "10h00" or "10h"
-  const match = clean.match(/(\d{1,2})[h:](\d{1,2})?/);
+  // Match "10:00" or "10 h 00" or "10h" with possible spaces
+  const match = clean.match(/(\d{1,2})\s*[h:]\s*(\d{1,2})?/);
   if (match) {
     const h = parseInt(match[1], 10);
     const m = parseInt(match[2] || "0", 10);

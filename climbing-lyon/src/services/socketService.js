@@ -4,10 +4,10 @@
 import { supabase } from './supabaseClient';
 
 export const subscribeToCrowdUpdates = (callback) => {
-  // On écoute les changements sur la table 'gyms'
-  // car notre trigger SQL met à jour 'crowdLevel' automatiquement
+  // On utilise un ID unique pour le canal pour éviter les conflits si plusieurs composants s'abonnent
+  const channelId = `gym-updates-${Math.random().toString(36).substring(2, 9)}`;
   const channel = supabase
-    .channel('public:gyms')
+    .channel(channelId)
     .on(
       'postgres_changes',
       {

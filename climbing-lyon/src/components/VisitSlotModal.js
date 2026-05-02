@@ -49,6 +49,15 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
 
   useEffect(() => {
     if (visible) {
+      // Update default time to NOW when opening
+      const nowOpen = new Date();
+      const h = String(nowOpen.getHours()).padStart(2, '0');
+      const m = String(nowOpen.getMinutes()).padStart(2, '0');
+      const newTime = `${h}:${m}`;
+      setTime(newTime);
+      setPrevTime(newTime);
+      setTimeError('');
+
       translateY.setValue(SCREEN_HEIGHT);
       backdropOpacity.setValue(0);
       Animated.parallel([

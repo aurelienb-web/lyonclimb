@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { parseTime } from '../utils/timeUtils';
 
 const CROWD_LEVELS = [
   { level: 1, label: 'Très calme', color: '#27ae60' },
@@ -31,7 +32,7 @@ const CrowdChart = ({ plannedVisits, openingHours, date }) => {
   const dayKey = days[dayIndex];
   const hoursString = openingHours[dayKey];
 
-  if (!hoursString || hoursString === 'Fermé') {
+  if (!hoursString || hoursString.trim().toLowerCase() === 'fermé') {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>La salle est fermée ce jour-là.</Text>
@@ -39,29 +40,53 @@ const CrowdChart = ({ plannedVisits, openingHours, date }) => {
     );
   }
 
-  const [openStr, closeStr] = hoursString.split('-');
-  const toMins = (t) => {
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m;
-  };
+  // Use robust split from timeUtils
+  const parts = hoursString.split(/[-–—à]| au /i).map(s => s.trim());
+  if (parts.length < 2) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Horaires indisponibles.</Text>
+      </View>
+    );
+  }
 
-  const openMins = toMins(openStr);
-  const closeMins = toMins(closeStr);
+  const openMins = parseTime(parts[0]);
+  const closeMins = parseTime(parts[1]);
+
+  if (openMins === null || closeMins === null) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Erreur de lecture des horaires.</Text>
+      </View>
+    );
+  }
 
   const now = new Date();
   const nowMins = now.getHours() * 60 + now.getMinutes();
 
+  // Handle midnight wrap-around (e.g. 10:00-01:00)
+  let effectiveCloseMins = closeMins;
+  if (closeMins <= openMins) {
+    effectiveCloseMins += 24 * 60;
+  }
+
   // Generate 30-min slots
   const slots = [];
-  for (let mins = openMins; mins < closeMins; mins += 30) {
-    const h = Math.floor(mins / 60);
+  for (let mins = openMins; mins < effectiveCloseMins; mins += 30) {
+    const h = Math.floor(mins / 60) % 24;
     const m = mins % 60;
     const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 
     // Count overlapping visits
-    const overlapping = plannedVisits.filter(v => {
-      const vStart = toMins(v.arrivalTime);
-      const vEnd = vStart + v.duration;
+    const overlapping = (plannedVisits || []).filter(v => {
+      const vStart = parseTime(v.arrivalTime);
+      if (vStart === null) return false;
+      const vEnd = vStart + (v.duration || 0);
+      
+      // Normalize comparison for slots after midnight
+      // If the slot is e.g. 25:00 (01:00 next day)
+      // and a visit starts at 00:30, it should match.
+      // But let's stay simple: overlap condition mins < vEnd && vStart < mins + 30
       return mins < vEnd && vStart < mins + 30;
     });
 
@@ -74,14 +99,17 @@ const CrowdChart = ({ plannedVisits, openingHours, date }) => {
     else if (count >= 10) level = 3;
     else if (count >= 5) level = 2;
 
+    const levelInfo = CROWD_LEVELS.find(cl => cl.level === level) || CROWD_LEVELS[0];
+
     slots.push({
       time: timeStr,
       count,
       level,
-      color: isPast ? '#adb5bd' : CROWD_LEVELS.find(cl => cl.level === level).color,
+      color: isPast ? '#adb5bd' : levelInfo.color,
       isPast
     });
   }
+
 
   const handleScrollStep = (direction) => {
     if (scrollRef.current) {
