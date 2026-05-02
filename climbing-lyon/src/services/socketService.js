@@ -1,28 +1,36 @@
-import { io } from 'socket.io-client';
-
-// On utilise la même IP que l'API mais sans le suffixe /api
-const SOCKET_URL = 'https://lyonclimb.onrender.com';
 //const SOCKET_URL = 'http://192.168.1.11:12000';
 //const SOCKET_URL = 'http://192.168.1.20:12000';
 
-const socket = io(SOCKET_URL, {
-  transports: ['websocket', 'polling'], // Ajout de polling pour plus de compatibilité
-  autoConnect: true,
-});
-
-socket.on('connect', () => {
-  console.log('🔌 Connecté au serveur WebSocket');
-});
-
-socket.on('disconnect', () => {
-  console.log('🔌 Déconnecté du serveur WebSocket');
-});
+import { supabase } from './supabaseClient';
 
 export const subscribeToCrowdUpdates = (callback) => {
-  socket.on('gym_crowd_updated', callback);
+  // On écoute les changements sur la table 'gyms'
+  // car notre trigger SQL met à jour 'crowdLevel' automatiquement
+  const channel = supabase
+    .channel('public:gyms')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'gyms',
+      },
+      (payload) => {
+        console.log('Change received!', payload);
+        // On renvoie un objet compatible avec l'ancien socket.io
+        callback({
+          gymId: payload.new.id,
+          crowdLevel: payload.new.crowdLevel
+        });
+      }
+    )
+    .subscribe();
+
   return () => {
-    socket.off('gym_crowd_updated', callback);
+    supabase.removeChannel(channel);
   };
 };
 
-export default socket;
+export default {
+  subscribeToCrowdUpdates
+};
