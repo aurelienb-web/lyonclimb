@@ -12,6 +12,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import GymDetailScreen from './src/screens/GymDetailScreen';
 import SubscriptionsScreen from './src/screens/SubscriptionsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import MapScreen from './src/screens/MapScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -19,6 +20,7 @@ const Tab = createBottomTabNavigator();
 const TabIcon = ({ name, focused }) => {
   const icons = {
     'Salles': '🧗',
+    'Carte': '📍',
     'Mes salles': '⭐',
     'A propos de LONE': '👤',
   };
@@ -77,6 +79,7 @@ const MainTabs = () => (
     })}
   >
     <Tab.Screen name="Salles" component={HomeStack} />
+    <Tab.Screen name="Carte" component={MapScreen} />
     <Tab.Screen name="Mes salles" component={SubscriptionsScreen} />
     <Tab.Screen 
       name="A propos de LONE" 

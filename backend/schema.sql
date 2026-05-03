@@ -11,7 +11,9 @@ CREATE TABLE gyms (
   pricing JSONB,
   features JSONB,
   image TEXT,
-  "crowdLevel" INTEGER DEFAULT 1
+  "crowdLevel" INTEGER DEFAULT 1,
+  latitude FLOAT,
+  longitude FLOAT
 );
 
 CREATE TABLE users (

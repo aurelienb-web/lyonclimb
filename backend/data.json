@@ -30,7 +30,9 @@
         "Sauna"
       ],
       "image": "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400",
-      "crowdLevel": 3
+      "crowdLevel": 3,
+      "latitude": 45.7425,
+      "longitude": 4.8235
     },
     {
       "id": "2",
@@ -62,7 +64,9 @@
         "Bar"
       ],
       "image": "https://images.unsplash.com/photo-1564769662533-4f00a87b4056?w=400",
-      "crowdLevel": 5
+      "crowdLevel": 5,
+      "latitude": 45.7607,
+      "longitude": 4.8817
     },
     {
       "id": "3",
@@ -93,7 +97,9 @@
         "Cours d'initiation"
       ],
       "image": "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=400",
-      "crowdLevel": 4
+      "crowdLevel": 4,
+      "latitude": 45.7366,
+      "longitude": 4.8761
     },
     {
       "id": "4",
@@ -124,7 +130,9 @@
         "Café"
       ],
       "image": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400",
-      "crowdLevel": 3
+      "crowdLevel": 3,
+      "latitude": 45.7533,
+      "longitude": 4.8724
     },
     {
       "id": "5",
@@ -156,7 +164,9 @@
         "Association"
       ],
       "image": "https://images.unsplash.com/photo-1606449935067-fc66c8921430?w=400",
-      "crowdLevel": 2
+      "crowdLevel": 2,
+      "latitude": 45.7618,
+      "longitude": 4.8778
     },
     {
       "id": "6",
@@ -188,7 +198,9 @@
         "Compétitions"
       ],
       "image": "https://images.unsplash.com/photo-1578763363228-6e8428de69b2?w=400",
-      "crowdLevel": 3
+      "crowdLevel": 3,
+      "latitude": 45.7667,
+      "longitude": 4.8075
     }
   ],
   "users": [
