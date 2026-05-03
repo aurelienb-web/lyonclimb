@@ -426,8 +426,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   dayButtonActive: {
-    backgroundColor: '#3498db',
-    borderColor: '#3498db',
+    backgroundColor: '#f6dd1e',
+    borderColor: '#f6dd1e',
   },
   dayButtonText: {
     fontSize: 14,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     color: '#7f8c8d',
   },
   dayButtonTextActive: {
-    color: '#fff',
+    color: '#2c3e50',
   },
   input: {
     borderWidth: 1.5,
@@ -475,8 +475,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   durationChipActive: {
-    backgroundColor: '#e74c3c',
-    borderColor: '#e74c3c',
+    backgroundColor: '#f6dd1e',
+    borderColor: '#f6dd1e',
   },
   durationText: {
     fontSize: 15,
@@ -484,21 +484,21 @@ const styles = StyleSheet.create({
     color: '#7f8c8d',
   },
   durationTextActive: {
-    color: '#fff',
+    color: '#2c3e50',
   },
   confirmButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#f6dd1e',
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 12,
-    boxShadow: '0 4 8 rgba(231, 76, 60, 0.3)',
+    boxShadow: '0 4 8 rgba(246, 221, 30, 0.3)',
     elevation: 4,
   },
   confirmText: {
-    color: '#fff',
+    color: '#2c3e50',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   cancelButton: {
     alignItems: 'center',

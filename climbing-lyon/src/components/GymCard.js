@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#e74c3c',
+    color: '#1ecff6',
   },
   crowdContainer: {
     flexDirection: 'row',

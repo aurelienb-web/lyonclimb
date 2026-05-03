@@ -314,7 +314,7 @@ const GymDetailScreen = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#e74c3c" animating={true} />
+        <ActivityIndicator size="large" color="#f6dd1e" animating={true} />
       </View>
     );
   }
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
     color: '#3498db',
   },
   subscribeButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#f6dd1e',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
@@ -607,8 +607,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#27ae60',
   },
   subscribeText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: '#2c3e50',
+    fontWeight: '700',
     fontSize: 14,
   },
   subscribedText: {
@@ -823,16 +823,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   unlockButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#f6dd1e',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
-    boxShadow: '0 3 6 rgba(231, 76, 60, 0.25)',
+    boxShadow: '0 3 6 rgba(246, 221, 30, 0.25)',
     elevation: 3,
   },
   unlockButtonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: '#2c3e50',
+    fontWeight: '800',
     fontSize: 15,
   },
   // ── Misc ──────────────────────────────────────────────────────────────────
@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
   priceValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#e74c3c',
+    color: '#1ecff6',
   },
   scheduleRow: {
     flexDirection: 'row',
