@@ -150,7 +150,10 @@ const MapScreen = ({ navigation }) => {
           <TouchableOpacity 
             activeOpacity={0.9}
             style={styles.card}
-            onPress={() => navigation.navigate('GymDetail', { gymId: selectedGym.id, gymName: selectedGym.name })}
+            onPress={() => navigation.navigate('Salles', { 
+              screen: 'GymDetail', 
+              params: { gymId: selectedGym.id, gymName: selectedGym.name } 
+            })}
           >
             <Image source={{ uri: selectedGym.image }} style={styles.cardImage} />
             <View style={styles.cardContent}>
