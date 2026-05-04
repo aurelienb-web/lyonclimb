@@ -35,6 +35,20 @@ async function cleanUpOldData() {
 
     const { error: err2 } = await supabase.from('plannedVisits').delete().lt('visitDate', todayStr);
     if (!err2) console.log(`✅ Créneaux planifiés obsolètes nettoyés.`);
+
+    // Reset crowdLevel to 0 for gyms with no recent updates (last 30 min)
+    const { data: gyms } = await supabase.from('gyms').select('id');
+    const recentThreshold = new Date(now.getTime() - (30 * 60 * 1000)).toISOString();
+    const { data: recentUpdates } = await supabase.from('crowdUpdates').select('gymId').gte('timestamp', recentThreshold);
+    
+    const gymsWithUpdates = new Set((recentUpdates || []).map(u => u.gymId));
+    
+    for (const gym of (gyms || [])) {
+      if (!gymsWithUpdates.has(gym.id)) {
+        await supabase.from('gyms').update({ crowdLevel: 0 }).eq('id', gym.id);
+      }
+    }
+    console.log(`✅ Niveaux d'affluence synchronisés.`);
   } catch (err) {
     console.error('Erreur lors du nettoyage:', err);
   }

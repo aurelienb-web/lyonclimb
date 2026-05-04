@@ -14,7 +14,6 @@ import {
   KeyboardAvoidingView,
   Pressable,
   Dimensions,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { parseTime } from '../utils/timeUtils';
 
@@ -246,21 +245,30 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
       visible={visible}
       transparent
       animationType="none"
-      onRequestClose={onClose}
+      onRequestClose={animateClose}
     >
       <View style={styles.overlay}>
-        {/* Backdrop — back to standard touchable (will require 2 taps if keyboard is open) */}
-        <TouchableWithoutFeedback onPress={() => {
-          Keyboard.dismiss();
-          onClose();
-        }}>
-          <View style={StyleSheet.absoluteFill} />
-        </TouchableWithoutFeedback>
+        {/* Animated backdrop background */}
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: 'rgba(0,0,0,0.55)',
+              opacity: backdropOpacity,
+            },
+          ]}
+        />
 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1, justifyContent: 'flex-end', width: '100%', pointerEvents: 'box-none' }}
         >
+          {/* Pressable backdrop — ensures single tap works even with keyboard open */}
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={animateClose}
+          />
+
           <Animated.View
             style={[
               styles.sheet,
@@ -367,7 +375,6 @@ const VisitSlotModal = ({ visible, openingHours, onConfirm, onClose }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
     justifyContent: 'flex-end',
   },
   sheet: {

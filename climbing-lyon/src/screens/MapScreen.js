@@ -17,11 +17,11 @@ import { subscribeToCrowdUpdates } from '../services/socketService';
 
 const { width, height } = Dimensions.get('window');
 
-const LYON_REGION = {
-  latitude: 45.7578,
-  longitude: 4.832,
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
+const FRANCE_REGION = {
+  latitude: 46.603354,
+  longitude: 1.888334,
+  latitudeDelta: 15,
+  longitudeDelta: 15,
 };
 
 const MapScreen = ({ navigation }) => {
@@ -63,8 +63,11 @@ const MapScreen = ({ navigation }) => {
   }, [selectedGym]);
 
   const getCrowdColor = (level) => {
-    if (level <= 2) return '#2ecc71';
-    if (level <= 4) return '#f1c40f';
+    if (level === 0) return '#6b7475';
+    if (level === 1) return '#27ae60';
+    if (level === 2) return '#2ecc71';
+    if (level === 3) return '#f39c12';
+    if (level === 4) return '#e67e22';
     return '#e74c3c';
   };
 
@@ -115,7 +118,7 @@ const MapScreen = ({ navigation }) => {
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={LYON_REGION}
+        initialRegion={FRANCE_REGION}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         showsUserLocation={true}
         showsMyLocationButton={false}
@@ -132,7 +135,7 @@ const MapScreen = ({ navigation }) => {
             tracksViewChanges={true}
           >
             <View style={[styles.markerContainer, { backgroundColor: getCrowdColor(gym.crowdLevel) }]}>
-              <Text style={styles.markerEmoji}>🧗</Text>
+              <View style={styles.markerDot} />
               <View style={[styles.markerArrow, { borderTopColor: getCrowdColor(gym.crowdLevel) }]} />
             </View>
           </Marker>
@@ -224,8 +227,9 @@ const styles = StyleSheet.create({
     color: '#2c3e50',
   },
   markerContainer: {
-    padding: 6,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 2,
     borderColor: '#fff',
     alignItems: 'center',
@@ -236,22 +240,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 4,
   },
-  markerEmoji: {
-    fontSize: 16,
+  markerDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#fff',
   },
   markerArrow: {
     width: 0,
     height: 0,
     backgroundColor: 'transparent',
     borderStyle: 'solid',
-    borderLeftWidth: 6,
-    borderRightWidth: 6,
-    borderTopWidth: 8,
+    borderLeftWidth: 7,
+    borderRightWidth: 7,
+    borderTopWidth: 10,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: 'inherit', // Should be handled by markerContainer background
     position: 'absolute',
-    bottom: -8,
+    bottom: -9,
   },
   cardContainer: {
     position: 'absolute',

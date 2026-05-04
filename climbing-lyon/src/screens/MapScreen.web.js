@@ -13,7 +13,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const LYON_CENTER = [45.7578, 4.832];
+const FRANCE_CENTER = [46.603354, 1.888334];
+const INITIAL_ZOOM = 5;
 
 // Composant pour forcer le rafraîchissement de la taille de la carte
 const MapController = ({ gyms, onMapClick }) => {
@@ -76,12 +77,16 @@ const MapScreen = ({ navigation }) => {
   }, [selectedGym]);
 
   const getCrowdColor = (level) => {
-    if (level <= 2) return '#2ecc71';
-    if (level <= 4) return '#f1c40f';
+    if (!level || level === 0) return '#6b7475';
+    if (level === 1) return '#27ae60';
+    if (level === 2) return '#2ecc71';
+    if (level === 3) return '#f39c12';
+    if (level === 4) return '#e67e22';
     return '#e74c3c';
   };
 
   const getCrowdLabel = (level) => {
+    if (!level || level === 0) return 'Aucune donnée pour le moment';
     if (level <= 2) return 'Peu fréquenté';
     if (level <= 4) return 'Modéré';
     return 'Très fréquenté';
@@ -99,8 +104,8 @@ const MapScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <MapContainer 
-        center={LYON_CENTER} 
-        zoom={13} 
+        center={FRANCE_CENTER} 
+        zoom={INITIAL_ZOOM} 
         style={{ height: '100%', width: '100%', zIndex: 0 }}
       >
         <TileLayer
@@ -115,9 +120,9 @@ const MapScreen = ({ navigation }) => {
             html: `
               <div style="
                 background-color: ${color};
-                width: 32px;
-                height: 32px;
-                border-radius: 16px 16px 16px 0;
+                width: 28px;
+                height: 28px;
+                border-radius: 14px 14px 14px 0;
                 transform: rotate(-45deg);
                 display: flex;
                 align-items: center;
@@ -125,11 +130,11 @@ const MapScreen = ({ navigation }) => {
                 border: 2px solid white;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.3);
               ">
-                <div style="transform: rotate(45deg); font-size: 16px;">🧗</div>
+                <div style="width: 7px; height: 7px; background-color: white; border-radius: 50%;"></div>
               </div>
             `,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32]
+            iconSize: [28, 28],
+            iconAnchor: [14, 28]
           });
 
           return (

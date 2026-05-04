@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,8 +27,19 @@ const ProfileScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.profileHeader}>
+          <View style={styles.avatarContainer}>
+            <Image 
+              source={require('../../assets/lone_logo.png')} 
+              style={styles.logoImage} 
+              resizeMode="contain"
+            />
+          </View>
+          <Text style={styles.userName}>LONE</Text>
+        </View>
+
         <View style={styles.infoSection}>
-          <Text style={styles.sectionTitle}>📱 A propos de LONE</Text>
+          <Text style={styles.sectionTitle}>A propos de LONE</Text>
 
           <View style={styles.infoCard}>
             <Text style={styles.infoTitle}>🧗 Salles d'Escalade</Text>
@@ -82,13 +94,17 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#fdecea',
+    backgroundColor: '#f6dd1e20',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   avatarIcon: {
     fontSize: 48,
+  },
+  logoImage: {
+    width: 60,
+    height: 60,
   },
   userName: {
     fontSize: 24,

@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View } from 'react-native';
+import { Text, View, Image } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 
@@ -25,6 +25,23 @@ const TabIcon = ({ name, focused }) => {
     'A propos de LONE': '👤',
   };
   
+  if (name === 'A propos de LONE') {
+    return (
+      <View style={{ alignItems: 'center' }}>
+        <Image 
+          source={require('./assets/lone_logo.png')} 
+          style={{ 
+            width: focused ? 28 : 24, 
+            height: focused ? 28 : 24,
+            opacity: focused ? 1 : 0.7,
+            borderRadius: 4
+          }} 
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={{ alignItems: 'center' }}>
       <Text style={{ fontSize: focused ? 26 : 22 }}>{icons[name]}</Text>
